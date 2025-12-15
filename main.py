@@ -526,12 +526,13 @@ class Api:
 
 
 def start_app():
-    # Inicializar la base de datos al arrancar
-    print("Iniciando la base de datos...")
-    database.init_db()
-    print("Base de datos lista.")
+    try:
+        # Inicializar la base de datos al arrancar
+        print("Iniciando la base de datos...")
+        database.init_db()
+        print("Base de datos lista.")
 
-    # Detectar la ruta correcta para los archivos UI
+        # Detectar la ruta correcta para los archivos UI
     # Cuando se ejecuta desde PyInstaller, usar sys._MEIPASS
     # Cuando se ejecuta normalmente, usar la ruta relativa
     if getattr(sys, 'frozen', False):
@@ -588,8 +589,32 @@ def start_app():
         resizable=True,
         min_size=(800, 600)
     )
-    api.set_window(window)
-    webview.start(debug=False) # debug=False para producción (no abre DevTools automáticamente)
+        api.set_window(window)
+        webview.start(debug=False) # debug=False para producción (no abre DevTools automáticamente)
+    except Exception as e:
+        import traceback
+        error_msg = f"Error al iniciar la aplicación:\n{str(e)}\n\n{traceback.format_exc()}"
+        print(error_msg)
+        # Mostrar error en una ventana si es posible
+        try:
+            import tkinter as tk
+            from tkinter import messagebox
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror("Error", error_msg)
+        except:
+            pass
+        raise
 
 if __name__ == '__main__':
-    start_app()
+    try:
+        start_app()
+    except Exception as e:
+        import traceback
+        print(f"\n{'='*60}")
+        print("ERROR FATAL:")
+        print(f"{'='*60}")
+        print(traceback.format_exc())
+        print(f"{'='*60}")
+        input("Presiona Enter para salir...")
+        sys.exit(1)
