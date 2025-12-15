@@ -57,3 +57,4 @@ jobs:
           dist/OpenPYME_ERP-Windows.zip
         retention-days: 30
 
+

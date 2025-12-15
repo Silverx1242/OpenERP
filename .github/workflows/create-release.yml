@@ -56,15 +56,25 @@ jobs:
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
         echo "Tag: $TAG_NAME"
         
-    - name: Download macOS artifacts
+    - name: Download macOS ARM64 artifacts
       uses: dawidd6/action-download-artifact@v3
       with:
-        name: OpenPYME_ERP-macOS
-        path: artifacts/macos
+        name: OpenPYME_ERP-macOS-arm64
+        path: artifacts/macos-arm64
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: build-macos.yml
         run_id: ${{ github.run_id }}
         if_no_artifact_found: warn
+        
+    - name: Download macOS Intel artifacts
+      uses: dawidd6/action-download-artifact@v3
+      with:
+        name: OpenPYME_ERP-macOS-intel
+        path: artifacts/macos-intel
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: build-macos.yml
+        run_id: ${{ github.run_id }}
+        if_no_artifact_found: ignore
         
     - name: Download Windows artifacts
       uses: dawidd6/action-download-artifact@v3
@@ -115,9 +125,11 @@ jobs:
           - **OpenPYME_ERP-Windows.zip** - Archivo comprimido con el ejecutable
           
           #### 🍎 macOS
-          - **OpenPYME_ERP.app** - Aplicación nativa para macOS
-          - **OpenPYME_ERP.dmg** - Instalador para macOS (recomendado)
-          - **OpenPYME_ERP-macOS.zip** - Archivo comprimido con la aplicación
+          - **OpenPYME_ERP-arm64.dmg** - Instalador para Apple Silicon (M1/M2/M3) - RECOMENDADO
+          - **OpenPYME_ERP-macOS-arm64.zip** - Archivo comprimido para Apple Silicon
+          - **OpenPYME_ERP-macOS-intel.zip** - Archivo comprimido para Intel Macs (si disponible)
+          
+          **Nota:** Si tienes un Mac con Apple Silicon (M1/M2/M3), usa la versión ARM64. Si tienes un Mac Intel, la versión ARM64 puede funcionar con Rosetta 2, pero si no funciona, intenta la versión Intel.
           
           #### 📄 Código Fuente
           - **OpenPYME_ERP-Source.zip** - Código fuente completo (ZIP)
@@ -132,13 +144,18 @@ jobs:
           4. Si Windows Defender muestra advertencia: "Más información" → "Ejecutar de todas formas"
           
           **macOS:**
-          1. Descarga `OpenPYME_ERP.dmg` (recomendado) o `OpenPYME_ERP-macOS.zip`
-          2. Si usas DMG: Abre el archivo y arrastra la app a la carpeta Aplicaciones
-          3. Si usas ZIP: Extrae y arrastra `OpenPYME_ERP.app` a Aplicaciones
-          4. Si macOS muestra advertencia de seguridad:
+          1. **Para Macs con Apple Silicon (M1/M2/M3):**
+             - Descarga `OpenPYME_ERP-arm64.dmg` (recomendado) o `OpenPYME_ERP-macOS-arm64.zip`
+          2. **Para Macs Intel:**
+             - Descarga `OpenPYME_ERP-macOS-intel.zip` si está disponible
+             - O intenta la versión ARM64 (funcionará con Rosetta 2)
+          3. Si usas DMG: Abre el archivo y arrastra la app a la carpeta Aplicaciones
+          4. Si usas ZIP: Extrae y arrastra `OpenPYME_ERP.app` a Aplicaciones
+          5. Si macOS muestra advertencia de seguridad:
              - Ve a: Sistema > Seguridad y Privacidad
              - Haz clic en "Abrir de todas formas"
-             - O ejecuta: `xattr -cr OpenPYME_ERP.app` en Terminal
+             - O ejecuta en Terminal: `xattr -cr OpenPYME_ERP.app`
+          6. Si ves error de compatibilidad: Asegúrate de descargar la versión correcta para tu arquitectura (ARM64 para Apple Silicon, Intel para Macs Intel)
           
           ### 🔧 Desarrollo desde Código Fuente
           

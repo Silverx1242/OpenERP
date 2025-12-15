@@ -7,8 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-macos:
-    runs-on: macos-latest
+  build-macos-arm64:
+    runs-on: macos-14
+    name: Build macOS (Apple Silicon)
     
     steps:
     - name: Checkout code
@@ -33,11 +34,7 @@ jobs:
           echo "Creating icono.icns from icono.ico..."
           ICONSET_DIR="assets/icono.iconset"
           mkdir -p "$ICONSET_DIR"
-          
-          # Convert ICO to PNG first using sips (native macOS tool)
           sips -s format png assets/icono.ico --out temp_icon.png
-          
-          # Create all required icon sizes
           sips -z 16 16 temp_icon.png --out "$ICONSET_DIR/icon_16x16.png"
           sips -z 32 32 temp_icon.png --out "$ICONSET_DIR/icon_16x16@2x.png"
           sips -z 32 32 temp_icon.png --out "$ICONSET_DIR/icon_32x32.png"
@@ -48,18 +45,12 @@ jobs:
           sips -z 512 512 temp_icon.png --out "$ICONSET_DIR/icon_256x256@2x.png"
           sips -z 512 512 temp_icon.png --out "$ICONSET_DIR/icon_512x512.png"
           sips -z 1024 1024 temp_icon.png --out "$ICONSET_DIR/icon_512x512@2x.png"
-          
           rm temp_icon.png
-          
-          # Create .icns file
           iconutil -c icns "$ICONSET_DIR" -o assets/icono.icns
           rm -rf "$ICONSET_DIR"
-          echo "✓ Icono .icns creado exitosamente"
-        else
-          echo "✓ Icono .icns ya existe"
         fi
         
-    - name: Build macOS app with PyInstaller
+    - name: Build macOS app with PyInstaller (ARM64)
       run: |
         pyinstaller --name="OpenPYME_ERP" \
           --windowed \
@@ -75,30 +66,100 @@ jobs:
     - name: Create DMG
       run: |
         if [ -d "dist/OpenPYME_ERP.app" ]; then
-          hdiutil create -volname "OpenPYME ERP" -srcfolder "dist/OpenPYME_ERP.app" -ov -format UDZO "dist/OpenPYME_ERP.dmg"
+          hdiutil create -volname "OpenPYME ERP" -srcfolder "dist/OpenPYME_ERP.app" -ov -format UDZO "dist/OpenPYME_ERP-arm64.dmg"
           echo "✓ DMG creado exitosamente"
-        else
-          echo "⚠ No se encontró la aplicación .app, saltando creación de DMG"
         fi
         
     - name: Create ZIP archive
       run: |
         if [ -d "dist/OpenPYME_ERP.app" ]; then
           cd dist
-          zip -r OpenPYME_ERP-macOS.zip OpenPYME_ERP.app
+          zip -r OpenPYME_ERP-macOS-arm64.zip OpenPYME_ERP.app
           cd ..
-          echo "✓ ZIP creado exitosamente"
-        else
-          echo "⚠ No se encontró la aplicación .app, saltando creación de ZIP"
         fi
         
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: OpenPYME_ERP-macOS
+        name: OpenPYME_ERP-macOS-arm64
         path: |
           dist/OpenPYME_ERP.app
           dist/*.dmg
           dist/*.zip
         retention-days: 30
 
+  build-macos-intel:
+    runs-on: macos-13  # macOS Ventura en Intel runner si está disponible
+    name: Build macOS (Intel)
+    continue-on-error: true  # Continuar aunque falle (por si no hay runners Intel)
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        architecture: x64
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+        
+    - name: Create .icns from .ico (if needed)
+      run: |
+        if [ ! -f "assets/icono.icns" ]; then
+          echo "Creating icono.icns from icono.ico..."
+          ICONSET_DIR="assets/icono.iconset"
+          mkdir -p "$ICONSET_DIR"
+          sips -s format png assets/icono.ico --out temp_icon.png
+          sips -z 16 16 temp_icon.png --out "$ICONSET_DIR/icon_16x16.png"
+          sips -z 32 32 temp_icon.png --out "$ICONSET_DIR/icon_16x16@2x.png"
+          sips -z 32 32 temp_icon.png --out "$ICONSET_DIR/icon_32x32.png"
+          sips -z 64 64 temp_icon.png --out "$ICONSET_DIR/icon_32x32@2x.png"
+          sips -z 128 128 temp_icon.png --out "$ICONSET_DIR/icon_128x128.png"
+          sips -z 256 256 temp_icon.png --out "$ICONSET_DIR/icon_128x128@2x.png"
+          sips -z 256 256 temp_icon.png --out "$ICONSET_DIR/icon_256x256.png"
+          sips -z 512 512 temp_icon.png --out "$ICONSET_DIR/icon_256x256@2x.png"
+          sips -z 512 512 temp_icon.png --out "$ICONSET_DIR/icon_512x512.png"
+          sips -z 1024 1024 temp_icon.png --out "$ICONSET_DIR/icon_512x512@2x.png"
+          rm temp_icon.png
+          iconutil -c icns "$ICONSET_DIR" -o assets/icono.icns
+          rm -rf "$ICONSET_DIR"
+        fi
+        
+    - name: Build macOS app with PyInstaller (Intel)
+      run: |
+        pyinstaller --name="OpenPYME_ERP" \
+          --windowed \
+          --noconfirm \
+          --onedir \
+          --icon=assets/icono.icns \
+          --add-data="app/ui:app/ui" \
+          --add-data="assets:assets" \
+          --osx-bundle-identifier="com.openpyme.erp" \
+          --clean \
+          main.py
+          
+    - name: Create ZIP archive
+      run: |
+        if [ -d "dist/OpenPYME_ERP.app" ]; then
+          cd dist
+          zip -r OpenPYME_ERP-macOS-intel.zip OpenPYME_ERP.app
+          cd ..
+        fi
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: OpenPYME_ERP-macOS-intel
+        path: |
+          dist/OpenPYME_ERP.app
+          dist/*.zip
+        retention-days: 30
+        if-no-files-found: ignore
