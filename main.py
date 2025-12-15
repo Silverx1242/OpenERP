@@ -535,26 +535,48 @@ def start_app():
     # Cuando se ejecuta desde PyInstaller, usar sys._MEIPASS
     # Cuando se ejecuta normalmente, usar la ruta relativa
     if getattr(sys, 'frozen', False):
-        # Ejecutándose desde el bundle compilado
+        # Ejecutándose desde el bundle compilado de PyInstaller
+        # PyInstaller coloca los archivos en sys._MEIPASS
         base_path = sys._MEIPASS
         html_path = os.path.join(base_path, 'app', 'ui', 'index.html')
+        
+        # Si no está ahí, buscar en Resources (para bundles macOS)
+        if not os.path.exists(html_path):
+            # Obtener la ruta del ejecutable
+            if sys.platform == 'darwin' and '.app' in sys.executable:
+                # Estamos en un .app bundle de macOS
+                bundle_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(sys.executable))))
+                resources_path = os.path.join(bundle_path, 'Contents', 'Resources')
+                html_path = os.path.join(resources_path, 'app', 'ui', 'index.html')
     else:
         # Ejecutándose desde código fuente
-        html_path = os.path.join(os.path.dirname(__file__), 'app', 'ui', 'index.html')
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        html_path = os.path.join(base_path, 'app', 'ui', 'index.html')
     
-    # Verificar que el archivo existe
+    # Verificar que el archivo existe, con múltiples fallbacks
     if not os.path.exists(html_path):
-        # Fallback: intentar ruta relativa
+        # Fallback 1: ruta relativa desde donde se ejecuta
         html_path = 'app/ui/index.html'
-        if not os.path.exists(html_path):
-            # Usar file:// para ruta absoluta
-            html_path = os.path.abspath(html_path)
+        
+    if not os.path.exists(html_path):
+        # Fallback 2: buscar en el directorio actual
+        html_path = os.path.abspath('app/ui/index.html')
+        
+    if not os.path.exists(html_path):
+        # Fallback 3: buscar en el directorio del script
+        html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'ui', 'index.html')
+    
+    # Convertir a ruta absoluta
+    html_path = os.path.abspath(html_path)
+    
+    if not os.path.exists(html_path):
+        raise FileNotFoundError(f"No se pudo encontrar app/ui/index.html. Buscado en: {html_path}")
     
     print(f"Cargando HTML desde: {html_path}")
     
-    # Convertir a file:// URL si es necesario
-    if not html_path.startswith('http') and not html_path.startswith('file://'):
-        html_path = f"file://{os.path.abspath(html_path)}"
+    # Convertir a file:// URL para webview
+    if not html_path.startswith('file://'):
+        html_path = f"file://{html_path}"
 
     api = Api()
     window = webview.create_window(
