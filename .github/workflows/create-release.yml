@@ -24,7 +24,8 @@ jobs:
         ref: ${{ github.ref }}
         check-name: 'Build macOS App'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 10
+        wait-interval: 30
+        allowed-conclusions: success,failure
         
     - name: Wait for Windows build
       uses: lewagon/wait-on-check-action@v1.3.4
@@ -32,7 +33,8 @@ jobs:
         ref: ${{ github.ref }}
         check-name: 'Build Windows Executable'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 10
+        wait-interval: 30
+        allowed-conclusions: success,failure
 
   create-release:
     needs: wait-for-builds
@@ -61,7 +63,8 @@ jobs:
         path: artifacts/macos
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: build-macos.yml
-        commit: ${{ github.sha }}
+        run_id: ${{ github.run_id }}
+        if_no_artifact_found: warn
         
     - name: Download Windows artifacts
       uses: dawidd6/action-download-artifact@v3
@@ -70,11 +73,12 @@ jobs:
         path: artifacts/windows
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: build-windows.yml
-        commit: ${{ github.sha }}
+        run_id: ${{ github.run_id }}
+        if_no_artifact_found: warn
         
     - name: Create source code archives
       run: |
-        TAG_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/refs\/tags\///')
+        TAG_NAME=${GITHUB_REF#refs/tags/}
         git archive --format=zip --output=artifacts/OpenPYME_ERP-Source-$TAG_NAME.zip HEAD
         git archive --format=tar.gz --output=artifacts/OpenPYME_ERP-Source-$TAG_NAME.tar.gz HEAD
         echo "✓ Archivos de código fuente creados"
@@ -82,7 +86,7 @@ jobs:
     - name: Generate changelog
       id: changelog
       run: |
-        TAG_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/refs\/tags\///')
+        TAG_NAME=${GITHUB_REF#refs/tags/}
         PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
         if [ -z "$PREV_TAG" ]; then
           CHANGELOG=$(git log --pretty=format:"- %s" HEAD)
@@ -158,7 +162,11 @@ jobs:
           
           Las contribuciones son bienvenidas. Ver [CONTRIBUTING.md](https://github.com/${{ github.repository }}/blob/main/CONTRIBUTING.md) para más información.
         files: |
-          artifacts/**/*
+          artifacts/**/*.zip
+          artifacts/**/*.tar.gz
+          artifacts/**/*.exe
+          artifacts/**/*.app
+          artifacts/**/*.dmg
         draft: false
         prerelease: false
       env:
