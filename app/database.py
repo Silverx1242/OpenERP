@@ -1,12 +1,38 @@
 import sqlite3
 import os
+import sys
 
 """
 Este módulo maneja toda la interacción con la base de datos local SQLite.
 (Versión extendida con Costos de Producto y ajuste de stock)
 """
 
-DB_FILE = 'erp_data.db'
+def get_db_path():
+    """
+    Obtiene la ruta correcta para el archivo de base de datos.
+    En macOS cuando se ejecuta desde .app bundle, usa el directorio del usuario.
+    """
+    if getattr(sys, 'frozen', False):
+        # Ejecutándose desde un ejecutable compilado
+        if sys.platform == 'darwin' and '.app' in sys.executable:
+            # macOS: usar directorio Documents del usuario
+            db_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'OpenPYME_ERP')
+            os.makedirs(db_dir, exist_ok=True)
+            return os.path.join(db_dir, 'erp_data.db')
+        else:
+            # Windows/Linux: usar directorio del ejecutable
+            if hasattr(sys, '_MEIPASS'):
+                # PyInstaller: usar directorio del ejecutable, no _MEIPASS
+                base_path = os.path.dirname(sys.executable)
+            else:
+                base_path = os.path.dirname(os.path.abspath(sys.executable))
+            return os.path.join(base_path, 'erp_data.db')
+    else:
+        # Ejecutándose desde código fuente: usar directorio del proyecto
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, 'erp_data.db')
+
+DB_FILE = get_db_path()
 
 def get_db_connection():
     """Conecta a la base de datos SQLite."""
