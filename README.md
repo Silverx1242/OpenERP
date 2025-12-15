@@ -24,8 +24,8 @@ Sistema de gestión empresarial (ERP/CRM) para pequeñas y medianas empresas, de
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/openpyme-erp.git
-cd openpyme-erp
+git clone https://github.com/Silverx1242/OpenERP.git
+cd OpenERP
 ```
 
 2. Crea un entorno virtual (recomendado):
@@ -51,7 +51,7 @@ python main.py
 
 ## 📦 Descarga de ejecutables
 
-Puedes descargar ejecutables pre-construidos desde la sección [Releases](https://github.com/tu-usuario/openpyme-erp/releases).
+Puedes descargar ejecutables pre-construidos desde la sección [Releases](https://github.com/Silverx1242/OpenERP/releases).
 
 ### macOS
 - Descarga el archivo `.dmg` o `.app.zip` desde los releases
