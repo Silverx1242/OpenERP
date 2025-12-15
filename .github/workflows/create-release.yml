@@ -1,0 +1,166 @@
+name: Create Release Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  wait-for-builds:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.TAG_NAME }}
+    steps:
+    - name: Get tag name
+      id: tag
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "Tag: $TAG_NAME"
+        
+    - name: Wait for macOS build
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: 'Build macOS App'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 10
+        
+    - name: Wait for Windows build
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: 'Build Windows Executable'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 10
+
+  create-release:
+    needs: wait-for-builds
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Get tag name
+      id: tag
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "Tag: $TAG_NAME"
+        
+    - name: Download macOS artifacts
+      uses: dawidd6/action-download-artifact@v3
+      with:
+        name: OpenPYME_ERP-macOS
+        path: artifacts/macos
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: build-macos.yml
+        commit: ${{ github.sha }}
+        
+    - name: Download Windows artifacts
+      uses: dawidd6/action-download-artifact@v3
+      with:
+        name: OpenPYME_ERP-Windows
+        path: artifacts/windows
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: build-windows.yml
+        commit: ${{ github.sha }}
+        
+    - name: Create source code archives
+      run: |
+        TAG_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/refs\/tags\///')
+        git archive --format=zip --output=artifacts/OpenPYME_ERP-Source-$TAG_NAME.zip HEAD
+        git archive --format=tar.gz --output=artifacts/OpenPYME_ERP-Source-$TAG_NAME.tar.gz HEAD
+        echo "✓ Archivos de código fuente creados"
+        
+    - name: Generate changelog
+      id: changelog
+      run: |
+        TAG_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/refs\/tags\///')
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -z "$PREV_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s" HEAD)
+        else
+          CHANGELOG=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
+        fi
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- Versión inicial"
+        fi
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.TAG_NAME }}
+        name: Release ${{ steps.tag.outputs.TAG_NAME }}
+        body: |
+          ## 🚀 OpenPYME ERP ${{ steps.tag.outputs.TAG_NAME }}
+          
+          ### 📦 Descargas Disponibles
+          
+          #### 🪟 Windows
+          - **OpenPYME_ERP.exe** - Ejecutable standalone para Windows
+          - **OpenPYME_ERP-Windows.zip** - Archivo comprimido con el ejecutable
+          
+          #### 🍎 macOS
+          - **OpenPYME_ERP.app** - Aplicación nativa para macOS
+          - **OpenPYME_ERP.dmg** - Instalador para macOS (recomendado)
+          - **OpenPYME_ERP-macOS.zip** - Archivo comprimido con la aplicación
+          
+          #### 📄 Código Fuente
+          - **OpenPYME_ERP-Source.zip** - Código fuente completo (ZIP)
+          - **OpenPYME_ERP-Source.tar.gz** - Código fuente completo (TAR.GZ)
+          
+          ### 📋 Instrucciones de Instalación
+          
+          **Windows:**
+          1. Descarga `OpenPYME_ERP-Windows.zip`
+          2. Extrae el archivo
+          3. Ejecuta `OpenPYME_ERP.exe`
+          4. Si Windows Defender muestra advertencia: "Más información" → "Ejecutar de todas formas"
+          
+          **macOS:**
+          1. Descarga `OpenPYME_ERP.dmg` (recomendado) o `OpenPYME_ERP-macOS.zip`
+          2. Si usas DMG: Abre el archivo y arrastra la app a la carpeta Aplicaciones
+          3. Si usas ZIP: Extrae y arrastra `OpenPYME_ERP.app` a Aplicaciones
+          4. Si macOS muestra advertencia de seguridad:
+             - Ve a: Sistema > Seguridad y Privacidad
+             - Haz clic en "Abrir de todas formas"
+             - O ejecuta: `xattr -cr OpenPYME_ERP.app` en Terminal
+          
+          ### 🔧 Desarrollo desde Código Fuente
+          
+          Para desarrollar o compilar desde el código fuente:
+          1. Descarga `OpenPYME_ERP-Source.zip` o `.tar.gz`
+          2. Extrae el archivo
+          3. Instala dependencias: `pip install -r requirements.txt`
+          4. Ejecuta: `python main.py`
+          
+          Ver el [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) para más información.
+          
+          ### 📝 Cambios en esta versión
+          
+          ${{ steps.changelog.outputs.CHANGELOG }}
+          
+          ### 🐛 Reportar Problemas
+          
+          Si encuentras algún problema, por favor abre un [Issue](https://github.com/${{ github.repository }}/issues).
+          
+          ### ⭐ Contribuir
+          
+          Las contribuciones son bienvenidas. Ver [CONTRIBUTING.md](https://github.com/${{ github.repository }}/blob/main/CONTRIBUTING.md) para más información.
+        files: |
+          artifacts/**/*
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
