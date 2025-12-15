@@ -531,10 +531,35 @@ def start_app():
     database.init_db()
     print("Base de datos lista.")
 
+    # Detectar la ruta correcta para los archivos UI
+    # Cuando se ejecuta desde PyInstaller, usar sys._MEIPASS
+    # Cuando se ejecuta normalmente, usar la ruta relativa
+    if getattr(sys, 'frozen', False):
+        # Ejecutándose desde el bundle compilado
+        base_path = sys._MEIPASS
+        html_path = os.path.join(base_path, 'app', 'ui', 'index.html')
+    else:
+        # Ejecutándose desde código fuente
+        html_path = os.path.join(os.path.dirname(__file__), 'app', 'ui', 'index.html')
+    
+    # Verificar que el archivo existe
+    if not os.path.exists(html_path):
+        # Fallback: intentar ruta relativa
+        html_path = 'app/ui/index.html'
+        if not os.path.exists(html_path):
+            # Usar file:// para ruta absoluta
+            html_path = os.path.abspath(html_path)
+    
+    print(f"Cargando HTML desde: {html_path}")
+    
+    # Convertir a file:// URL si es necesario
+    if not html_path.startswith('http') and not html_path.startswith('file://'):
+        html_path = f"file://{os.path.abspath(html_path)}"
+
     api = Api()
     window = webview.create_window(
         'OpenPYME ERP/CRM',
-        'app/ui/index.html',  # Carga el archivo HTML principal
+        html_path,  # Carga el archivo HTML principal con ruta corregida
         js_api=api,           # Expone la clase 'Api' a JavaScript
         width=1280,
         height=800,
