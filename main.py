@@ -9,13 +9,13 @@ from app import database
 from app import excel_export
 
 """
-Este es el archivo principal que lanza la aplicación.
-Utiliza 'pywebview' para crear una ventana de escritorio nativa
-que carga el frontend desde la carpeta 'app/ui/'.
+This is the main file that launches the application.
+Uses 'pywebview' to create a native desktop window
+that loads the frontend from the 'app/ui/' folder.
 """
 
-# La API_BINDING es un objeto que permite que JavaScript
-# llame a funciones de Python.
+# The API_BINDING is an object that allows JavaScript
+# to call Python functions.
 class Api:
     def __init__(self):
         self._window = None
@@ -24,14 +24,14 @@ class Api:
     def set_window(self, window):
         self._window = window
 
-    # --- API de Inventario (Ejemplos) ---
+    # --- Inventory API ---
 
     def load_products(self):
         """
-        Llamado desde JS al cargar la página.
-        Devuelve todos los productos de la BD.
+        Called from JS when loading the page.
+        Returns all products from the database.
         """
-        print("[Python] load_products() llamado")
+        print("[Python] load_products() called")
         try:
             products = database.get_all_products()
             return {'success': True, 'data': products}
@@ -40,64 +40,64 @@ class Api:
 
     def add_product(self, name, product_type, stock, min_stock, cost, supplier=None, purchase_date=None, exit_date=None, sku=None, weight=0, stock_unit_type='units', additional_cost=0):
         """
-        Llamado desde JS cuando el usuario envía el formulario.
-        Incluye 'cost', proveedor, fechas, SKU, gramaje, tipo de unidad de stock y costo adicional.
+        Called from JS when the user submits the form.
+        Includes 'cost', supplier, dates, SKU, weight, stock unit type and additional cost.
         """
-        print(f"[Python] add_product() llamado con: {name}, {product_type}, Costo: {cost}, Proveedor: {supplier}, SKU: {sku}, Gramaje: {weight}, Tipo Stock: {stock_unit_type}, Costo Adicional: {additional_cost}")
+        print(f"[Python] add_product() called with: {name}, {product_type}, Cost: {cost}, Supplier: {supplier}, SKU: {sku}, Weight: {weight}, Stock Type: {stock_unit_type}, Additional Cost: {additional_cost}")
         try:
             database.add_product(name, product_type, float(stock), float(min_stock), float(cost), supplier, purchase_date, exit_date, sku, float(weight), stock_unit_type, float(additional_cost))
-            return {'success': True, 'message': f'Producto {name} añadido'}
+            return {'success': True, 'message': f'Product {name} added'}
         except Exception as e:
-            print(f"Error al añadir producto: {e}")
+            print(f"Error adding product: {e}")
             return {'success': False, 'message': str(e)}
 
     def adjust_inventory(self, product_id, quantity_change):
         """
-        Llamado desde JS para ajustar el stock de un item.
+        Called from JS to adjust the stock of an item.
         """
-        print(f"[Python] adjust_inventory() llamado para ID {product_id}, Cambio: {quantity_change}")
+        print(f"[Python] adjust_inventory() called for ID {product_id}, Change: {quantity_change}")
         try:
             database.update_product_stock(product_id, float(quantity_change))
-            return {'success': True, 'message': 'Stock actualizado'}
+            return {'success': True, 'message': 'Stock updated'}
         except Exception as e:
-            print(f"Error al ajustar stock: {e}")
+            print(f"Error adjusting stock: {e}")
             return {'success': False, 'message': str(e)}
 
     def update_product(self, product_id, name, product_type, stock, min_stock, cost, supplier=None, purchase_date=None, exit_date=None, sku=None, weight=0, stock_unit_type='units', additional_cost=0):
-        """Actualiza un producto existente."""
-        print(f"[Python] update_product() llamado para ID {product_id}")
+        """Updates an existing product."""
+        print(f"[Python] update_product() called for ID {product_id}")
         try:
             database.update_product(product_id, name, product_type, float(stock), float(min_stock), float(cost), supplier, purchase_date, exit_date, sku, float(weight), stock_unit_type, float(additional_cost))
-            return {'success': True, 'message': f'Producto {name} actualizado'}
+            return {'success': True, 'message': f'Product {name} updated'}
         except Exception as e:
-            print(f"Error al actualizar producto: {e}")
+            print(f"Error updating product: {e}")
             return {'success': False, 'message': str(e)}
 
     def delete_product(self, product_id):
-        """Elimina un producto."""
-        print(f"[Python] delete_product() llamado para ID {product_id}")
+        """Deletes a product."""
+        print(f"[Python] delete_product() called for ID {product_id}")
         try:
             database.delete_product(product_id)
-            return {'success': True, 'message': 'Producto eliminado'}
+            return {'success': True, 'message': 'Product deleted'}
         except Exception as e:
-            print(f"Error al eliminar producto: {e}")
+            print(f"Error deleting product: {e}")
             return {'success': False, 'message': str(e)}
 
 
     def get_products_by_type(self, product_type):
-        """Obtiene productos filtrados por tipo (para rellenar dropdowns)."""
-        print(f"[Python] get_products_by_type({product_type}) llamado")
+        """Gets products filtered by type (for populating dropdowns)."""
+        print(f"[Python] get_products_by_type({product_type}) called")
         try:
             products = database.get_products_by_type(product_type)
             return {'success': True, 'data': products}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    # --- API de BOM (Bill of Materials) ---
+    # --- BOM (Bill of Materials) API ---
 
     def get_bom(self, parent_product_id):
-        """Obtiene la lista de materiales para un producto."""
-        print(f"[Python] get_bom({parent_product_id}) llamado")
+        """Gets the bill of materials for a product."""
+        print(f"[Python] get_bom({parent_product_id}) called")
         try:
             bom_items = database.get_bom_for_product(parent_product_id)
             return {'success': True, 'data': bom_items}
@@ -105,37 +105,37 @@ class Api:
             return {'success': False, 'message': str(e)}
 
     def add_bom_entry(self, parent_id, child_id, quantity):
-        """Añade una entrada al BOM."""
+        """Adds an entry to the BOM."""
         print(f"[Python] add_bom_entry({parent_id}, {child_id}, {quantity})")
         try:
             database.add_bom_entry(parent_id, child_id, float(quantity))
-            return {'success': True, 'message': 'Insumo añadido al BOM'}
+            return {'success': True, 'message': 'Component added to BOM'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def delete_bom_entry(self, bom_id):
-        """Elimina una entrada del BOM."""
+        """Deletes an entry from the BOM."""
         print(f"[Python] delete_bom_entry({bom_id})")
         try:
             database.delete_bom_entry(bom_id)
-            return {'success': True, 'message': 'Insumo eliminado del BOM'}
+            return {'success': True, 'message': 'Component removed from BOM'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def calculate_mrp_production(self, product_id):
-        """Calcula cuántos productos se pueden fabricar según el BOM y el inventario."""
-        print(f"[Python] calculate_mrp_production() llamado para producto ID {product_id}")
+        """Calculates how many products can be manufactured based on BOM and inventory."""
+        print(f"[Python] calculate_mrp_production() called for product ID {product_id}")
         try:
             result = database.calculate_mrp_production(product_id)
             if result:
                 return {'success': True, 'data': result}
-            return {'success': False, 'message': 'Producto no encontrado'}
+            return {'success': False, 'message': 'Product not found'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def execute_production(self, product_id, quantity):
-        """Ejecuta la producción: reduce insumos y aumenta producto final."""
-        print(f"[Python] execute_production() llamado para producto ID {product_id}, cantidad: {quantity}")
+        """Executes production: reduces components and increases final product."""
+        print(f"[Python] execute_production() called for product ID {product_id}, quantity: {quantity}")
         try:
             result = database.execute_production(product_id, int(quantity))
             return result
@@ -143,39 +143,39 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def calculate_bom_cost(self, product_id):
-        """Calcula el costo unitario basado en el BOM."""
-        print(f"[Python] calculate_bom_cost() llamado para producto ID {product_id}")
+        """Calculates unit cost based on BOM."""
+        print(f"[Python] calculate_bom_cost() called for product ID {product_id}")
         try:
             result = database.calculate_bom_cost(product_id)
             if result:
                 return {'success': True, 'data': result}
-            return {'success': False, 'message': 'Producto no encontrado'}
+            return {'success': False, 'message': 'Product not found'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    # --- API de Finanzas ---
+    # --- Finance API ---
 
     def add_revenue_entry(self, description, amount, date=None):
-        """Añade un registro de ingreso."""
-        print(f"[Python] add_revenue_entry: {description}, {amount}, fecha: {date}")
+        """Adds a revenue entry."""
+        print(f"[Python] add_revenue_entry: {description}, {amount}, date: {date}")
         try:
             database.add_revenue(description, float(amount), date)
-            return {'success': True, 'message': 'Ingreso añadido'}
+            return {'success': True, 'message': 'Revenue added'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    def add_cost_entry(self, description, amount, date=None, category='Otros'):
-        """Añade un registro de costo."""
-        print(f"[Python] add_cost_entry: {description}, {amount}, categoría: {category}, fecha: {date}")
+    def add_cost_entry(self, description, amount, date=None, category='Others'):
+        """Adds a cost entry."""
+        print(f"[Python] add_cost_entry: {description}, {amount}, category: {category}, date: {date}")
         try:
             database.add_cost(description, float(amount), date, category)
-            return {'success': True, 'message': 'Costo añadido'}
+            return {'success': True, 'message': 'Cost added'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
     def get_recent_finances(self):
-        """Obtiene finanzas recientes para la vista de Finanzas."""
-        print("[Python] get_recent_finances() llamado")
+        """Gets recent finances for the Finance view."""
+        print("[Python] get_recent_finances() called")
         try:
             revenue = database.get_recent_revenue()
             costs = database.get_recent_costs()
@@ -184,8 +184,8 @@ class Api:
             return {'success': False, 'message': str(e)}
 
     def get_all_finances(self):
-        """Obtiene todas las finanzas para edición."""
-        print("[Python] get_all_finances() llamado")
+        """Gets all finances for editing."""
+        print("[Python] get_all_finances() called")
         try:
             revenue = database.get_all_revenue()
             costs = database.get_all_costs()
@@ -194,55 +194,55 @@ class Api:
             return {'success': False, 'message': str(e)}
 
     def update_revenue_entry(self, revenue_id, description, amount, date=None):
-        """Actualiza un registro de ingreso."""
-        print(f"[Python] update_revenue_entry() llamado para ID {revenue_id}")
+        """Updates a revenue entry."""
+        print(f"[Python] update_revenue_entry() called for ID {revenue_id}")
         try:
             database.update_revenue(revenue_id, description, float(amount), date)
-            return {'success': True, 'message': 'Ingreso actualizado'}
+            return {'success': True, 'message': 'Revenue updated'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    def update_cost_entry(self, cost_id, description, amount, date=None, category='Otros'):
-        """Actualiza un registro de costo."""
-        print(f"[Python] update_cost_entry() llamado para ID {cost_id}")
+    def update_cost_entry(self, cost_id, description, amount, date=None, category='Others'):
+        """Updates a cost entry."""
+        print(f"[Python] update_cost_entry() called for ID {cost_id}")
         try:
             database.update_cost(cost_id, description, float(amount), date, category)
-            return {'success': True, 'message': 'Costo actualizado'}
+            return {'success': True, 'message': 'Cost updated'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
     def delete_revenue_entry(self, revenue_id):
-        """Elimina un registro de ingreso."""
-        print(f"[Python] delete_revenue_entry() llamado para ID {revenue_id}")
+        """Deletes a revenue entry."""
+        print(f"[Python] delete_revenue_entry() called for ID {revenue_id}")
         try:
             database.delete_revenue(revenue_id)
-            return {'success': True, 'message': 'Ingreso eliminado'}
+            return {'success': True, 'message': 'Revenue deleted'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
     def delete_cost_entry(self, cost_id):
-        """Elimina un registro de costo."""
-        print(f"[Python] delete_cost_entry() llamado para ID {cost_id}")
+        """Deletes a cost entry."""
+        print(f"[Python] delete_cost_entry() called for ID {cost_id}")
         try:
             database.delete_cost(cost_id)
-            return {'success': True, 'message': 'Costo eliminado'}
+            return {'success': True, 'message': 'Cost deleted'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
 
-    # --- API de Dashboard (Ejemplo) ---
+    # --- Dashboard API ---
 
     def get_kpi_data(self, period='month'):
         """
-        ¡MODIFICADO! Esta función ahora calcula todos los KPIs
-        y obtiene los datos financieros reales con soporte para diferentes períodos.
+        This function now calculates all KPIs
+        and gets real financial data with support for different periods.
         """
-        print(f"[Python] get_kpi_data() llamado con período: {period}")
+        print(f"[Python] get_kpi_data() called with period: {period}")
         try:
-            # 1. Obtener datos financieros (¡Reales!) con período configurable
+            # 1. Get financial data (Real!) with configurable period
             financial_summary = database.get_financial_summary(period)
             
-            # 2. Obtener datos de inventario y calcular KPIs
+            # 2. Get inventory data and calculate KPIs
             products = database.get_all_products()
             total_stock_items = 0
             stock_alerts_count = 0
@@ -252,12 +252,12 @@ class Api:
                 total_stock_items += p['stock']
                 if p['stock'] < p['min_stock']:
                     stock_alerts_count += 1
-                total_inventory_value += p['stock'] * p['cost'] # ¡Nuevo KPI!
+                total_inventory_value += p['stock'] * p['cost'] # New KPI!
 
             inventory_kpis = {
                 'total_stock_items': total_stock_items,
                 'stock_alerts_count': stock_alerts_count,
-                'total_inventory_value': round(total_inventory_value, 2) # Redondear a 2 decimales
+                'total_inventory_value': round(total_inventory_value, 2) # Round to 2 decimals
             }
 
             return {
@@ -272,20 +272,20 @@ class Api:
             return {'success': False, 'message': str(e)}
 
 
-    # --- API de Ventas ---
+    # --- Sales API ---
     
     def add_sale(self, product_id, product_name, quantity, unit_price, date=None):
-        """Añade una venta al historial."""
-        print(f"[Python] add_sale: {product_name}, cantidad: {quantity}, precio: {unit_price}")
+        """Adds a sale to the history."""
+        print(f"[Python] add_sale: {product_name}, quantity: {quantity}, price: {unit_price}")
         try:
             database.add_sale(product_id, product_name, float(quantity), float(unit_price), date)
-            return {'success': True, 'message': 'Venta registrada'}
+            return {'success': True, 'message': 'Sale registered'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def add_multiple_sales(self, sales_list):
-        """Añade múltiples ventas al historial."""
-        print(f"[Python] add_multiple_sales: {len(sales_list)} ventas")
+        """Adds multiple sales to the history."""
+        print(f"[Python] add_multiple_sales: {len(sales_list)} sales")
         try:
             result = database.add_multiple_sales(sales_list)
             return result
@@ -293,8 +293,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_all_sales(self):
-        """Obtiene todas las ventas."""
-        print("[Python] get_all_sales() llamado")
+        """Gets all sales."""
+        print("[Python] get_all_sales() called")
         try:
             sales = database.get_all_sales()
             return {'success': True, 'data': sales}
@@ -302,8 +302,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_recent_sales(self, limit=10):
-        """Obtiene las ventas más recientes."""
-        print(f"[Python] get_recent_sales() llamado con límite: {limit}")
+        """Gets the most recent sales."""
+        print(f"[Python] get_recent_sales() called with limit: {limit}")
         try:
             sales = database.get_recent_sales(limit)
             return {'success': True, 'data': sales}
@@ -311,48 +311,48 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_sale_by_id(self, sale_id):
-        """Obtiene una venta por su ID."""
-        print(f"[Python] get_sale_by_id() llamado para ID {sale_id}")
+        """Gets a sale by its ID."""
+        print(f"[Python] get_sale_by_id() called for ID {sale_id}")
         try:
             sale = database.get_sale_by_id(sale_id)
             if sale:
                 return {'success': True, 'data': sale}
-            return {'success': False, 'message': 'Venta no encontrada'}
+            return {'success': False, 'message': 'Sale not found'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def update_sale(self, sale_id, product_id, product_name, quantity, unit_price, date=None):
-        """Actualiza una venta existente."""
-        print(f"[Python] update_sale() llamado para ID {sale_id}")
+        """Updates an existing sale."""
+        print(f"[Python] update_sale() called for ID {sale_id}")
         try:
             database.update_sale(sale_id, product_id, product_name, float(quantity), float(unit_price), date)
-            return {'success': True, 'message': 'Venta actualizada'}
+            return {'success': True, 'message': 'Sale updated'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def delete_sale(self, sale_id):
-        """Elimina una venta."""
-        print(f"[Python] delete_sale() llamado para ID {sale_id}")
+        """Deletes a sale."""
+        print(f"[Python] delete_sale() called for ID {sale_id}")
         try:
             database.delete_sale(sale_id)
-            return {'success': True, 'message': 'Venta eliminada'}
+            return {'success': True, 'message': 'Sale deleted'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
     
     def get_sales_by_period(self, period='month'):
-        """Obtiene ventas filtradas por período."""
-        print(f"[Python] get_sales_by_period() llamado con período: {period}")
+        """Gets sales filtered by period."""
+        print(f"[Python] get_sales_by_period() called with period: {period}")
         try:
             sales = database.get_sales_by_period(period)
             return {'success': True, 'data': sales}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    # --- API de Business Intelligence ---
+    # --- Business Intelligence API ---
     
     def get_top_products_by_sales(self, limit=5):
-        """Obtiene los top productos más vendidos."""
-        print(f"[Python] get_top_products_by_sales() llamado con límite: {limit}")
+        """Gets the top products by sales."""
+        print(f"[Python] get_top_products_by_sales() called with limit: {limit}")
         try:
             products = database.get_top_products_by_sales(limit)
             return {'success': True, 'data': products}
@@ -360,8 +360,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_top_products_by_profitability(self, limit=5):
-        """Obtiene los top productos más rentables."""
-        print(f"[Python] get_top_products_by_profitability() llamado con límite: {limit}")
+        """Gets the top products by profitability."""
+        print(f"[Python] get_top_products_by_profitability() called with limit: {limit}")
         try:
             products = database.get_top_products_by_profitability(limit)
             return {'success': True, 'data': products}
@@ -369,8 +369,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_cost_breakdown_by_category(self):
-        """Obtiene el desglose de costos por categoría."""
-        print("[Python] get_cost_breakdown_by_category() llamado")
+        """Gets the cost breakdown by category."""
+        print("[Python] get_cost_breakdown_by_category() called")
         try:
             breakdown = database.get_cost_breakdown_by_category()
             return {'success': True, 'data': breakdown}
@@ -378,8 +378,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_products_without_movement(self, days=30):
-        """Obtiene productos sin movimiento."""
-        print(f"[Python] get_products_without_movement() llamado con días: {days}")
+        """Gets products without movement."""
+        print(f"[Python] get_products_without_movement() called with days: {days}")
         try:
             products = database.get_products_without_movement(days)
             return {'success': True, 'data': products}
@@ -387,8 +387,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_inventory_valuation_by_category(self):
-        """Obtiene la valorización del inventario por categoría."""
-        print("[Python] get_inventory_valuation_by_category() llamado")
+        """Gets inventory valuation by category."""
+        print("[Python] get_inventory_valuation_by_category() called")
         try:
             valuation = database.get_inventory_valuation_by_category()
             return {'success': True, 'data': valuation}
@@ -396,8 +396,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_financial_metrics_current_month(self):
-        """Obtiene métricas financieras del mes actual."""
-        print("[Python] get_financial_metrics_current_month() llamado")
+        """Gets financial metrics for the current month."""
+        print("[Python] get_financial_metrics_current_month() called")
         try:
             metrics = database.get_financial_metrics_current_month()
             return {'success': True, 'data': metrics}
@@ -405,8 +405,8 @@ class Api:
             return {'success': False, 'message': str(e)}
     
     def get_bi_dashboard_data(self):
-        """Obtiene todos los datos para el dashboard de BI."""
-        print("[Python] get_bi_dashboard_data() llamado")
+        """Gets all data for the BI dashboard."""
+        print("[Python] get_bi_dashboard_data() called")
         try:
             top_sales = database.get_top_products_by_sales(5)
             top_profit = database.get_top_products_by_profitability(5)
@@ -429,89 +429,89 @@ class Api:
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
-    # --- Funciones de Exportación a Excel ---
+    # --- Excel Export Functions ---
 
     def export_to_excel(self):
         """
-        Exporta todos los datos a un archivo Excel.
+        Exports all data to an Excel file.
         """
-        print("[Python] Exportando a Excel...")
+        print("[Python] Exporting to Excel...")
         
         def _export():
             try:
                 filepath = excel_export.export_to_excel()
                 abs_path = os.path.abspath(filepath)
                 self._last_excel_file = abs_path
-                print(f"[Python] Exportación completada: {abs_path}")
+                print(f"[Python] Export completed: {abs_path}")
                 if self._window:
-                    self._window.evaluate_js(f"showNotification('Exportación completada: {abs_path}')")
+                    self._window.evaluate_js(f"showNotification('Export completed: {abs_path}')")
             except Exception as e:
-                print(f"Error al exportar: {e}")
+                print(f"Error exporting: {e}")
                 if self._window:
                     error_msg = str(e).replace("'", "\\'")
-                    self._window.evaluate_js(f"showNotification('Error al exportar: {error_msg}')")
+                    self._window.evaluate_js(f"showNotification('Error exporting: {error_msg}')")
 
         threading.Thread(target=_export).start()
-        return {'success': True, 'message': 'Exportación iniciada...'}
+        return {'success': True, 'message': 'Export started...'}
     
     def export_sales_report(self, period='month'):
         """
-        Exporta un informe de ventas por período a Excel.
+        Exports a sales report by period to Excel.
         """
-        print(f"[Python] Exportando informe de ventas ({period})...")
+        print(f"[Python] Exporting sales report ({period})...")
         
         def _export():
             try:
                 filepath = excel_export.export_sales_report(period)
                 abs_path = os.path.abspath(filepath)
                 self._last_excel_file = abs_path
-                print(f"[Python] Informe de ventas exportado: {abs_path}")
+                print(f"[Python] Sales report exported: {abs_path}")
                 if self._window:
-                    self._window.evaluate_js(f"showNotification('Informe exportado: {abs_path}')")
+                    self._window.evaluate_js(f"showNotification('Report exported: {abs_path}')")
             except Exception as e:
-                print(f"Error al exportar informe: {e}")
+                print(f"Error exporting report: {e}")
                 if self._window:
                     error_msg = str(e).replace("'", "\\'")
-                    self._window.evaluate_js(f"showNotification('Error al exportar informe: {error_msg}')")
+                    self._window.evaluate_js(f"showNotification('Error exporting report: {error_msg}')")
 
         threading.Thread(target=_export).start()
-        return {'success': True, 'message': 'Exportación de informe iniciada...'}
+        return {'success': True, 'message': 'Report export started...'}
     
     def open_excel_file(self, filepath=None):
         """
-        Abre un archivo Excel con la aplicación predeterminada del sistema.
-        Si no se proporciona filepath, intenta abrir el último archivo exportado.
+        Opens an Excel file with the system's default application.
+        If filepath is not provided, tries to open the last exported file.
         """
         try:
             if filepath is None:
                 if hasattr(self, '_last_excel_file') and self._last_excel_file:
                     filepath = self._last_excel_file
                 else:
-                    # Buscar el archivo más reciente en el directorio de exportación
+                    # Search for the most recent file in the export directory
                     import glob
-                    # Determinar el directorio de búsqueda
+                    # Determine the search directory
                     if platform.system() == 'Darwin' and '.app/Contents/MacOS' in sys.executable:
-                        # En macOS desde .app bundle, buscar en Documents
-                        search_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'OpenPYME_ERP')
+                        # On macOS from .app bundle, search in Documents
+                        search_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'OpenERP')
                         os.makedirs(search_dir, exist_ok=True)
                     else:
                         search_dir = os.getcwd()
                     
-                    # Buscar archivos Excel
+                    # Search for Excel files
                     pattern1 = os.path.join(search_dir, "export_erp_*.xlsx")
-                    pattern2 = os.path.join(search_dir, "informe_ventas_*.xlsx")
+                    pattern2 = os.path.join(search_dir, "sales_report_*.xlsx")
                     excel_files = glob.glob(pattern1) + glob.glob(pattern2)
                     
                     if excel_files:
                         filepath = max(excel_files, key=os.path.getctime)
                     else:
-                        return {'success': False, 'message': f'No se encontró ningún archivo Excel exportado en {search_dir}'}
+                        return {'success': False, 'message': f'No exported Excel file found in {search_dir}'}
             
             abs_path = os.path.abspath(filepath)
             if not os.path.exists(abs_path):
-                return {'success': False, 'message': f'El archivo no existe: {abs_path}'}
+                return {'success': False, 'message': f'File does not exist: {abs_path}'}
             
-            print(f"[Python] Abriendo archivo Excel: {abs_path}")
+            print(f"[Python] Opening Excel file: {abs_path}")
             system = platform.system()
             if system == 'Windows':
                 os.startfile(abs_path)
@@ -520,82 +520,82 @@ class Api:
             else:  # Linux
                 subprocess.run(['xdg-open', abs_path])
             
-            return {'success': True, 'message': f'Archivo abierto: {abs_path}'}
+            return {'success': True, 'message': f'File opened: {abs_path}'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
 
 def start_app():
     try:
-        # Inicializar la base de datos al arrancar
-        print("Iniciando la base de datos...")
+        # Initialize the database on startup
+        print("Starting database...")
         database.init_db()
-        print("Base de datos lista.")
+        print("Database ready.")
 
-        # Detectar la ruta correcta para los archivos UI
-        # Cuando se ejecuta desde PyInstaller, usar sys._MEIPASS
-        # Cuando se ejecuta normalmente, usar la ruta relativa
+        # Detect the correct path for UI files
+        # When running from PyInstaller, use sys._MEIPASS
+        # When running normally, use the relative path
         if getattr(sys, 'frozen', False):
-            # Ejecutándose desde el bundle compilado de PyInstaller
-            # PyInstaller coloca los archivos en sys._MEIPASS
+            # Running from PyInstaller compiled bundle
+            # PyInstaller places files in sys._MEIPASS
             base_path = sys._MEIPASS
             html_path = os.path.join(base_path, 'app', 'ui', 'index.html')
             
-            # Si no está ahí, buscar en Resources (para bundles macOS)
+            # If not there, search in Resources (for macOS bundles)
             if not os.path.exists(html_path):
-                # Obtener la ruta del ejecutable
+                # Get the executable path
                 if sys.platform == 'darwin' and '.app' in sys.executable:
-                    # Estamos en un .app bundle de macOS
+                    # We're in a macOS .app bundle
                     bundle_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(sys.executable))))
                     resources_path = os.path.join(bundle_path, 'Contents', 'Resources')
                     html_path = os.path.join(resources_path, 'app', 'ui', 'index.html')
         else:
-            # Ejecutándose desde código fuente
+            # Running from source code
             base_path = os.path.dirname(os.path.abspath(__file__))
             html_path = os.path.join(base_path, 'app', 'ui', 'index.html')
         
-        # Verificar que el archivo existe, con múltiples fallbacks
+        # Verify the file exists, with multiple fallbacks
         if not os.path.exists(html_path):
-            # Fallback 1: ruta relativa desde donde se ejecuta
+            # Fallback 1: relative path from where it's executed
             html_path = 'app/ui/index.html'
             
         if not os.path.exists(html_path):
-            # Fallback 2: buscar en el directorio actual
+            # Fallback 2: search in current directory
             html_path = os.path.abspath('app/ui/index.html')
             
         if not os.path.exists(html_path):
-            # Fallback 3: buscar en el directorio del script
+            # Fallback 3: search in script directory
             html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'ui', 'index.html')
         
-        # Convertir a ruta absoluta
+        # Convert to absolute path
         html_path = os.path.abspath(html_path)
         
         if not os.path.exists(html_path):
-            raise FileNotFoundError(f"No se pudo encontrar app/ui/index.html. Buscado en: {html_path}")
+            raise FileNotFoundError(f"Could not find app/ui/index.html. Searched in: {html_path}")
         
-        print(f"Cargando HTML desde: {html_path}")
+        print(f"Loading HTML from: {html_path}")
         
-        # Convertir a file:// URL para webview
+        # Convert to file:// URL for webview
         if not html_path.startswith('file://'):
             html_path = f"file://{html_path}"
 
         api = Api()
         window = webview.create_window(
-            'OpenPYME ERP/CRM',
-            html_path,  # Carga el archivo HTML principal con ruta corregida
-            js_api=api,           # Expone la clase 'Api' a JavaScript
+            'OpenERP',
+            html_path,  # Loads the main HTML file with corrected path
+            js_api=api,           # Exposes the 'Api' class to JavaScript
             width=1280,
             height=800,
             resizable=True,
             min_size=(800, 600)
         )
         api.set_window(window)
-        webview.start(debug=False) # debug=False para producción (no abre DevTools automáticamente)
+        webview.start(debug=False) # debug=False for production (doesn't open DevTools automatically)
     except Exception as e:
         import traceback
-        error_msg = f"Error al iniciar la aplicación:\n{str(e)}\n\n{traceback.format_exc()}"
+        error_msg = f"Error starting application:\n{str(e)}\n\n{traceback.format_exc()}"
         print(error_msg)
-        # Mostrar error en una ventana si es posible
+        # Show error in a window if possible
         try:
             import tkinter as tk
             from tkinter import messagebox
@@ -612,9 +612,9 @@ if __name__ == '__main__':
     except Exception as e:
         import traceback
         print(f"\n{'='*60}")
-        print("ERROR FATAL:")
+        print("FATAL ERROR:")
         print(f"{'='*60}")
         print(traceback.format_exc())
         print(f"{'='*60}")
-        input("Presiona Enter para salir...")
+        input("Press Enter to exit...")
         sys.exit(1)

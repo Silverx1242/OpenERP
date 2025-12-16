@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenPYME ERP</title>
+    <title>OpenERP</title>
     <!-- 1. Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- 2. Carga de Chart.js para los KPIs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- 3. Configuración de Tailwind (para colores de Google/Gemini) -->
+    <!-- 3. Tailwind Configuration (for Google/Gemini colors) -->
     <script>
         tailwind.config = {
             theme: {
@@ -18,7 +18,7 @@
                     colors: {
                         'gemini-blue': {
                             light: '#e8f0fe',
-                            DEFAULT: '#4285f4', // Azul principal de Google
+                            DEFAULT: '#4285f4', // Google's main blue
                             dark: '#174ea6',
                         },
                         'gemini-gray': {
@@ -30,14 +30,14 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'], // Fuente limpia
+                        sans: ['Inter', 'sans-serif'], // Clean font
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Estilo para la barra de scroll */
+        /* Scrollbar style */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
@@ -47,13 +47,13 @@
 </head>
 <body class="bg-gemini-gray-100 text-gemini-gray-900">
 
-    <!-- Contenedor principal de la aplicación -->
+    <!-- Main application container -->
     <div class="flex h-screen">
 
-        <!-- Barra lateral de navegación -->
+        <!-- Side navigation bar -->
         <nav class="w-48 md:w-56 bg-white shadow-md flex flex-col flex-shrink-0">
             <div class="p-4 border-b">
-                <h1 class="text-xl font-bold text-gemini-blue-dark">OpenPYME ERP</h1>
+                <h1 class="text-xl font-bold text-gemini-blue-dark">OpenERP</h1>
             </div>
             <ul class="flex-grow p-2">
                 <li class="mb-1">
@@ -65,56 +65,56 @@
                 <li class="mb-1">
                     <a href="#" onclick="showView('inventory')" class="nav-link flex items-center p-2 rounded-lg hover:bg-gemini-blue-light">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                        Inventario
+                        Inventory
                     </a>
                 </li>
                 <li class="mb-1">
                     <a href="#" onclick="showView('mrp')" class="nav-link flex items-center p-2 rounded-lg hover:bg-gemini-blue-light">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 0l3 3m-3-3v10m-6 4h6m-6 0l-3-3m3 3V7m0 14A10 10 0 115.636 5.636 10 10 0 0112 3v18z"></path></svg>
-                        Producción y MRP
+                        Production & MRP
                     </a>
                 </li>
-                <!-- ¡NUEVO! Enlace de Finanzas -->
+                <!-- NEW! Finance Link -->
                 <li class="mb-1">
                     <a href="#" onclick="showView('finanzas')" class="nav-link flex items-center p-2 rounded-lg hover:bg-gemini-blue-light">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0c-1.657 0-3-.895-3-2s1.343-2 3-2 3-.895 3-2 1.343-2 3-2m0 8c1.11 0 2.08-.402 2.599-1M12 16v1m0-1v-8m0 0c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0 8c1.11 0 2.08.402 2.599 1M12 4V3m0 1v4m0 0c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0 8a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                        Finanzas
+                        Finance
                     </a>
                 </li>
             </ul>
             <div class="p-4 border-t">
                 <button onclick="exportToExcel()" class="w-full bg-gemini-blue hover:bg-gemini-blue-dark text-white font-bold py-2 px-4 rounded-lg transition duration-200 mb-2">
-                    Exportar a Excel
+                    Export to Excel
                 </button>
                 <button onclick="openLastExcelFile()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                    Ver Excel
+                    View Excel
                 </button>
             </div>
         </nav>
 
-        <!-- Contenido principal -->
+        <!-- Main content -->
         <main class="flex-1 h-screen overflow-y-auto p-4 md:p-8">
             
-            <!-- Vista: Dashboard -->
+            <!-- View: Dashboard -->
             <div id="view-dashboard" class="view-content">
-                <h2 class="text-3xl font-semibold mb-6">Dashboard - Inteligencia de Negocios</h2>
+                <h2 class="text-3xl font-semibold mb-6">Dashboard - Business Intelligence</h2>
                 
-                <!-- Métricas Financieras Rápidas -->
+                <!-- Quick Financial Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Margen de Ganancia</div>
+                        <div class="text-sm text-gray-600">Profit Margin</div>
                         <div id="kpi-profit-margin" class="text-2xl font-bold text-green-600">0%</div>
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Ticket Promedio</div>
+                        <div class="text-sm text-gray-600">Average Ticket</div>
                         <div id="kpi-avg-ticket" class="text-2xl font-bold text-gemini-blue-dark">$ 0.00</div>
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Ventas del Mes</div>
+                        <div class="text-sm text-gray-600">Monthly Sales</div>
                         <div id="kpi-sales-count" class="text-2xl font-bold text-purple-600">0</div>
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Utilidad del Mes</div>
+                        <div class="text-sm text-gray-600">Monthly Profit</div>
                         <div id="kpi-month-profit" class="text-2xl font-bold text-green-600">$ 0.00</div>
                     </div>
                 </div>
@@ -122,32 +122,32 @@
                 <!-- KPIs de Inventario -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Valor Total del Inventario</div>
+                        <div class="text-sm text-gray-600">Total Inventory Value</div>
                         <div id="kpi-inventory-value" class="text-xl font-bold text-gemini-blue-dark">$ 0.00</div>
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="text-sm text-gray-600">Nivel de Stock (Total Items)</div>
+                        <div class="text-sm text-gray-600">Stock Level (Total Items)</div>
                         <div id="kpi-total-stock" class="text-xl font-bold text-gemini-blue-dark">0</div>
                     </div>
                 </div>
 
                 <!-- Productos con Alerta de Stock -->
                 <div class="bg-white p-6 rounded-lg shadow mb-6">
-                    <h3 class="font-semibold mb-4 text-lg text-red-700">⚠️ Productos con Alerta de Stock Bajo</h3>
+                    <h3 class="font-semibold mb-4 text-lg text-red-700">⚠️ Products with Low Stock Alert</h3>
                     <div id="stock-alerts-list" class="space-y-2">
-                        <p class="text-gray-500">Cargando...</p>
+                        <p class="text-gray-500">Loading...</p>
                     </div>
                 </div>
 
-                <!-- Gráfico Principal de Finanzas -->
+                <!-- Main Finance Chart -->
                 <div class="bg-white p-6 rounded-lg shadow mb-6">
                         <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-semibold text-lg">Ingresos, Costos y Utilidades</h3>
+                        <h3 class="font-semibold text-lg">Revenue, Costs and Profits</h3>
                             <select id="period-selector" class="text-sm rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <option value="day">Diario</option>
-                                <option value="week">Semanal</option>
-                                <option value="month" selected>Mensual</option>
-                                <option value="year">Anual</option>
+                                <option value="day">Daily</option>
+                                <option value="week">Weekly</option>
+                                <option value="month" selected>Monthly</option>
+                                <option value="year">Yearly</option>
                             </select>
                         </div>
                     <canvas id="kpiChart" height="80"></canvas>
@@ -155,39 +155,39 @@
 
                 <!-- Top Productos y Desglose de Gastos -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <!-- Top 5 Productos Más Vendidos -->
+                    <!-- Top 5 Best Selling Products -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-lg">Top 5 Productos Más Vendidos</h3>
+                        <h3 class="font-semibold mb-4 text-lg">Top 5 Best Selling Products</h3>
                         <canvas id="topSalesChart" height="200"></canvas>
                             </div>
                     
-                    <!-- Top 5 Productos Más Rentables -->
+                    <!-- Top 5 Most Profitable Products -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-lg">Top 5 Productos Más Rentables</h3>
+                        <h3 class="font-semibold mb-4 text-lg">Top 5 Most Profitable Products</h3>
                         <div id="topProfitabilityList" class="space-y-2">
-                            <!-- Se llenará con JS -->
+                            <!-- Will be filled with JS -->
                             </div>
                             </div>
                         </div>
 
                 <!-- Desglose de Gastos y Salud del Inventario -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <!-- Desglose de Gastos por Categoría -->
+                    <!-- Cost Breakdown by Category -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-lg">Desglose de Gastos por Categoría</h3>
+                        <h3 class="font-semibold mb-4 text-lg">Cost Breakdown by Category</h3>
                         <canvas id="costBreakdownChart" height="200"></canvas>
                     </div>
                     
-                    <!-- Valorización del Inventario por Categoría -->
+                    <!-- Inventory Valuation by Category -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-lg">Valorización del Inventario por Categoría</h3>
+                        <h3 class="font-semibold mb-4 text-lg">Inventory Valuation by Category</h3>
                         <canvas id="inventoryValuationChart" height="200"></canvas>
                     </div>
                 </div>
 
                 <!-- Productos Sin Movimiento -->
                 <div class="bg-white p-6 rounded-lg shadow mb-6">
-                    <h3 class="font-semibold mb-4 text-lg">Productos Sin Movimiento (Últimos 30 días)</h3>
+                    <h3 class="font-semibold mb-4 text-lg">Products Without Movement (Last 30 days)</h3>
                     <div id="productsNoMovementList" class="space-y-2">
                         <!-- Se llenará con JS -->
                     </div>
@@ -195,83 +195,83 @@
 
             </div>
 
-            <!-- Vista: Inventario -->
+            <!-- View: Inventory -->
             <div id="view-inventory" class="view-content hidden">
-                <h2 class="text-3xl font-semibold mb-6">Gestión de Inventario</h2>
+                <h2 class="text-3xl font-semibold mb-6">Inventory Management</h2>
                 
-                <!-- Formulario para añadir producto -->
+                <!-- Form to add product -->
                 <div class="bg-white p-4 md:p-6 rounded-lg shadow mb-6 md:mb-8">
-                    <h3 class="font-semibold mb-4 text-lg md:text-xl">Añadir Nuevo Producto</h3>
-                    <!-- ¡MODIFICADO! Grid con más campos -->
+                    <h3 class="font-semibold mb-4 text-lg md:text-xl">Add New Product</h3>
+                    <!-- MODIFIED! Grid with more fields -->
                     <form id="form-add-product" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                         <div>
                             <label for="product_sku" class="block text-sm font-medium text-gemini-gray-700">SKU / ID</label>
-                            <input type="text" id="product_sku" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Código SKU">
+                            <input type="text" id="product_sku" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="SKU Code">
                         </div>
                         <div class="md:col-span-2">
-                            <label for="product_name" class="block text-sm font-medium text-gemini-gray-700">Nombre</label>
+                            <label for="product_name" class="block text-sm font-medium text-gemini-gray-700">Name</label>
                             <input type="text" id="product_name" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                         </div>
                         <div>
-                            <label for="product_type" class="block text-sm font-medium text-gemini-gray-700">Tipo de Producto</label>
+                            <label for="product_type" class="block text-sm font-medium text-gemini-gray-700">Product Type</label>
                             <select id="product_type" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <option value="hijo">Insumo / Hijo</option>
-                                <option value="final">Producto Final</option>
-                                <option value="padre">Sub-ensamblaje / Padre</option>
-                                <option value="otro">Otro</option>
+                                <option value="hijo">Component / Child</option>
+                                <option value="final">Final Product</option>
+                                <option value="padre">Sub-assembly / Parent</option>
+                                <option value="otro">Other</option>
                             </select>
                         </div>
                         <div>
-                            <label for="product_supplier" class="block text-sm font-medium text-gemini-gray-700">Proveedor</label>
-                            <input type="text" id="product_supplier" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Nombre del proveedor">
+                            <label for="product_supplier" class="block text-sm font-medium text-gemini-gray-700">Supplier</label>
+                            <input type="text" id="product_supplier" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Supplier name">
                         </div>
                         <div>
-                            <label for="product_cost" class="block text-sm font-medium text-gemini-gray-700">Costo Unitario</label>
+                            <label for="product_cost" class="block text-sm font-medium text-gemini-gray-700">Unit Cost</label>
                             <div class="flex items-center space-x-2">
                                 <input type="number" id="product_cost" value="0" step="0.01" class="mt-1 block flex-1 rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <button type="button" onclick="calculateCostFromBOM()" class="mt-1 text-xs bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700" title="Calcular costo basado en BOM">💰 Calcular</button>
+                                <button type="button" onclick="calculateCostFromBOM()" class="mt-1 text-xs bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700" title="Calculate cost based on BOM">💰 Calculate</button>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500" id="cost-calculation-hint">Costo final = Costo de materiales + Costo adicional</p>
+                            <p class="mt-1 text-xs text-gray-500" id="cost-calculation-hint">Final cost = Materials cost + Additional cost</p>
                         </div>
                         <div>
-                            <label for="product_additional_cost" class="block text-sm font-medium text-gemini-gray-700">Costo Adicional</label>
+                            <label for="product_additional_cost" class="block text-sm font-medium text-gemini-gray-700">Additional Cost</label>
                             <input type="number" id="product_additional_cost" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                            <p class="mt-1 text-xs text-gray-500">Costos adicionales (mano de obra, overhead, etc.) que se suman al costo de materiales</p>
+                            <p class="mt-1 text-xs text-gray-500">Additional costs (labor, overhead, etc.) that are added to materials cost</p>
                         </div>
                         <div>
-                            <label for="product_stock" class="block text-sm font-medium text-gemini-gray-700">Stock Inicial</label>
+                            <label for="product_stock" class="block text-sm font-medium text-gemini-gray-700">Initial Stock</label>
                             <input type="number" id="product_stock" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                            <p class="mt-1 text-xs text-gray-500" id="stock-unit-hint">En unidades o gramos según el tipo seleccionado</p>
+                            <p class="mt-1 text-xs text-gray-500" id="stock-unit-hint">In units or grams according to selected type</p>
                         </div>
                         <div>
-                            <label for="product_min_stock" class="block text-sm font-medium text-gemini-gray-700">Stock Mínimo</label>
+                            <label for="product_min_stock" class="block text-sm font-medium text-gemini-gray-700">Min Stock</label>
                             <input type="number" id="product_min_stock" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                            <p class="mt-1 text-xs text-gray-500" id="min-stock-unit-hint">En unidades o gramos según el tipo seleccionado</p>
+                            <p class="mt-1 text-xs text-gray-500" id="min-stock-unit-hint">In units or grams according to selected type</p>
                         </div>
                         <div>
-                            <label for="product_purchase_date" class="block text-sm font-medium text-gemini-gray-700">Fecha de Compra</label>
+                            <label for="product_purchase_date" class="block text-sm font-medium text-gemini-gray-700">Purchase Date</label>
                             <input type="date" id="product_purchase_date" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                         </div>
                         <div>
-                            <label for="product_exit_date" class="block text-sm font-medium text-gemini-gray-700">Fecha de Salida</label>
+                            <label for="product_exit_date" class="block text-sm font-medium text-gemini-gray-700">Exit Date</label>
                             <input type="date" id="product_exit_date" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                         </div>
                         <div>
-                            <label for="product_stock_unit_type" class="block text-sm font-medium text-gemini-gray-700">Tipo de Medición de Stock</label>
+                            <label for="product_stock_unit_type" class="block text-sm font-medium text-gemini-gray-700">Stock Measurement Type</label>
                             <select id="product_stock_unit_type" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" onchange="updateStockUnitHints()">
-                                <option value="units">Unidades</option>
-                                <option value="grams">Gramos</option>
+                                <option value="units">Units</option>
+                                <option value="grams">Grams</option>
                             </select>
-                            <p class="mt-1 text-xs text-gray-500">Unidades: cuenta por piezas. Gramos: cuenta por peso.</p>
+                            <p class="mt-1 text-xs text-gray-500">Units: count by pieces. Grams: count by weight.</p>
                         </div>
                         <div>
-                            <label for="product_weight" class="block text-sm font-medium text-gemini-gray-700">Gramaje por Unidad (g)</label>
-                            <input type="number" id="product_weight" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Gramos por unidad">
-                            <p class="mt-1 text-xs text-gray-500">Solo aplica si el stock se mide en unidades.</p>
+                            <label for="product_weight" class="block text-sm font-medium text-gemini-gray-700">Weight per Unit (g)</label>
+                            <input type="number" id="product_weight" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Grams per unit">
+                            <p class="mt-1 text-xs text-gray-500">Only applies if stock is measured in units.</p>
                         </div>
                         <div class="md:col-span-2 lg:col-span-4 flex justify-end">
                             <button type="submit" class="w-full md:w-auto bg-gemini-blue hover:bg-gemini-blue-dark text-white font-bold py-2 px-4 md:px-6 rounded-lg transition duration-200">
-                                Guardar Producto
+                                Save Product
                             </button>
                         </div>
                     </form>
@@ -285,130 +285,130 @@
                             <tr>
                                 <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">ID</th>
                                 <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">SKU</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Nombre</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Tipo</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Proveedor</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Costo</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Valor Total</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Stock Actual</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Stock Mínimo</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Fecha Compra</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Fecha Salida</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Tipo Stock</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Gramaje</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Peso Total</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Ajustar Stock</th>
-                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Acciones</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Name</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Type</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Supplier</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Cost</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Total Value</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Current Stock</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Min Stock</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Purchase Date</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Exit Date</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Stock Type</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Weight</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Total Weight</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Adjust Stock</th>
+                                <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="product-list-body" class="bg-white divide-y divide-gemini-gray-200">
-                            <!-- Los productos se cargarán aquí desde JS -->
+                            <!-- Products will be loaded here from JS -->
                         </tbody>
                     </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Vista: MRP -->
+            <!-- View: MRP -->
             <div id="view-mrp" class="view-content hidden">
-                <h2 class="text-3xl font-semibold mb-6">Producción y MRP</h2>
+                <h2 class="text-3xl font-semibold mb-6">Production & MRP</h2>
                 
-                <!-- Definición de BOM (Lista de Materiales) -->
+                <!-- BOM Definition (Bill of Materials) -->
                 <div class="bg-white p-8 rounded-lg shadow mb-8">
-                    <h3 class="font-semibold mb-4 text-xl">Definir Lista de Materiales (BOM)</h3>
+                    <h3 class="font-semibold mb-4 text-xl">Define Bill of Materials (BOM)</h3>
                     
-                    <!-- 1. Seleccionar producto padre -->
+                    <!-- 1. Select parent product -->
                     <div class="mb-4">
-                        <label for="mrp-select-parent" class="block text-sm font-medium text-gemini-gray-700">Selecciona un Producto (Cualquier producto puede ser padre)</label>
+                        <label for="mrp-select-parent" class="block text-sm font-medium text-gemini-gray-700">Select a Product (Any product can be a parent)</label>
                         <select id="mrp-select-parent" class="mt-1 block w-full md:w-1/2 rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                            <option value="">Cargando productos...</option>
+                            <option value="">Loading products...</option>
                         </select>
                     </div>
 
-                    <!-- 2. Formulario para añadir insumos (hijos) -->
+                    <!-- 2. Form to add components (children) -->
                     <form id="form-add-bom" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
-                            <label for="mrp-select-child" class="block text-sm font-medium text-gemini-gray-700">Insumo / Producto Componente (Cualquier producto puede ser hijo)</label>
+                            <label for="mrp-select-child" class="block text-sm font-medium text-gemini-gray-700">Component / Product (Any product can be a child)</label>
                             <select id="mrp-select-child" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <option value="">Cargando productos...</option>
+                                <option value="">Loading products...</option>
                             </select>
                         </div>
                         <div>
-                            <label for="mrp-child-quantity" class="block text-sm font-medium text-gemini-gray-700">Cantidad Necesaria</label>
+                            <label for="mrp-child-quantity" class="block text-sm font-medium text-gemini-gray-700">Required Quantity</label>
                             <input type="number" id="mrp-child-quantity" value="1" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                         </div>
                         <div>
                             <button type="submit" class="w-full bg-gemini-blue hover:bg-gemini-blue-dark text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Añadir Insumo
+                                Add Component
                             </button>
                         </div>
                     </form>
 
-                    <!-- 3. Lista de BOM actual -->
+                    <!-- 3. Current BOM list -->
                     <div class="mt-6">
-                        <h4 class="font-semibold mb-2">Insumos actuales para este producto:</h4>
+                        <h4 class="font-semibold mb-2">Current components for this product:</h4>
                         <ul id="mrp-bom-list" class="list-disc list-inside bg-gemini-gray-100 p-4 rounded-lg">
-                            <!-- Insumos se cargarán aquí -->
+                            <!-- Components will be loaded here -->
                         </ul>
                     </div>
                 </div>
 
-                <!-- Calculadora de MRP -->
+                <!-- MRP Calculator -->
                 <div class="bg-white p-8 rounded-lg shadow">
-                    <h3 class="font-semibold mb-4 text-xl">Calculadora de Producción (MRP)</h3>
-                    <p class="mb-4">Una vez definas el BOM (arriba), aquí podrás calcular cuántos productos puedes fabricar con tu inventario actual.</p>
+                    <h3 class="font-semibold mb-4 text-xl">Production Calculator (MRP)</h3>
+                    <p class="mb-4">Once you define the BOM (above), here you can calculate how many products you can manufacture with your current inventory.</p>
                     <div class="mt-4">
-                        <label for="mrp-calculate-product" class="block text-sm font-medium text-gemini-gray-700 mb-2">Selecciona el producto a calcular:</label>
+                        <label for="mrp-calculate-product" class="block text-sm font-medium text-gemini-gray-700 mb-2">Select product to calculate:</label>
                         <select id="mrp-calculate-product" class="mt-1 block w-full md:w-1/2 rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                            <option value="">Selecciona un producto...</option>
+                            <option value="">Select a product...</option>
                         </select>
                         <button onclick="calculateMRP()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
-                            Calcular Producción
+                            Calculate Production
                         </button>
                         <div id="mrp-result" class="mt-4 p-4 bg-gemini-gray-100 rounded-lg hidden">
-                            <!-- Resultados del cálculo MRP -->
+                            <!-- MRP calculation results -->
                         </div>
                         <div id="mrp-production-controls" class="mt-4 hidden">
-                            <label for="mrp-production-quantity" class="block text-sm font-medium text-gemini-gray-700 mb-2">Cantidad a Producir:</label>
+                            <label for="mrp-production-quantity" class="block text-sm font-medium text-gemini-gray-700 mb-2">Quantity to Produce:</label>
                             <div class="flex items-center space-x-2">
                                 <input type="number" id="mrp-production-quantity" min="1" step="1" class="block w-32 rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                                 <button onclick="executeProduction()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
-                                    Ejecutar Producción
+                                    Execute Production
                                 </button>
                             </div>
-                            <p class="mt-2 text-xs text-gray-500">Esto reducirá el stock de los insumos y aumentará el stock del producto final.</p>
+                            <p class="mt-2 text-xs text-gray-500">This will reduce component stock and increase final product stock.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Vista: Finanzas -->
+            <!-- View: Finance -->
             <div id="view-finanzas" class="view-content hidden">
-                <h2 class="text-3xl font-semibold mb-6">Gestión de Finanzas</h2>
+                <h2 class="text-3xl font-semibold mb-6">Finance Management</h2>
 
-                <!-- Historial de Ventas -->
+                <!-- Sales History -->
                 <div class="bg-white p-6 rounded-lg shadow mb-8">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-semibold text-xl text-blue-700">Historial de Ventas</h3>
+                        <h3 class="font-semibold text-xl text-blue-700">Sales History</h3>
                         <div class="flex space-x-2">
                             <div class="relative">
                                 <button onclick="toggleSalesReportMenu()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                    Descargar Informe
+                                    Download Report
                                 </button>
                                 <div id="salesReportMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border">
                                     <div class="py-1">
-                                        <button onclick="exportSalesReport('day')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Informe del Día</button>
-                                        <button onclick="exportSalesReport('week')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Informe de la Semana</button>
-                                        <button onclick="exportSalesReport('month')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Informe del Mes</button>
-                                        <button onclick="exportSalesReport('year')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Informe del Año</button>
+                                        <button onclick="exportSalesReport('day')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Day Report</button>
+                                        <button onclick="exportSalesReport('week')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Week Report</button>
+                                        <button onclick="exportSalesReport('month')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Month Report</button>
+                                        <button onclick="exportSalesReport('year')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Year Report</button>
                                     </div>
                                 </div>
                             </div>
                             <button onclick="showAddSaleModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Nueva Venta
+                                New Sale
                             </button>
                             <button onclick="showAddMultipleSalesModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Múltiples Ventas
+                                Multiple Sales
                             </button>
                         </div>
                     </div>
@@ -416,10 +416,10 @@
                         <table class="min-w-full divide-y divide-gemini-gray-200">
                             <thead class="bg-gemini-gray-100">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Fecha</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Producto</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Cantidad</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Precio Unitario</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Product</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Quantity</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Unit Price</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Total</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gemini-gray-700 uppercase">Acciones</th>
                                 </tr>
@@ -432,30 +432,30 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Columna de Ingresos -->
+                    <!-- Revenue Column -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-xl text-green-700">Añadir Ingreso</h3>
+                        <h3 class="font-semibold mb-4 text-xl text-green-700">Add Revenue</h3>
                         <form id="form-add-revenue">
                             <div class="mb-4">
-                                <label for="revenue-description" class="block text-sm font-medium text-gemini-gray-700">Descripción</label>
+                                <label for="revenue-description" class="block text-sm font-medium text-gemini-gray-700">Description</label>
                                 <input type="text" id="revenue-description" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                             </div>
                             <div class="mb-4">
-                                <label for="revenue-amount" class="block text-sm font-medium text-gemini-gray-700">Monto</label>
+                                <label for="revenue-amount" class="block text-sm font-medium text-gemini-gray-700">Amount</label>
                                 <input type="number" id="revenue-amount" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                             </div>
                             <div class="mb-4">
-                                <label for="revenue-date" class="block text-sm font-medium text-gemini-gray-700">Fecha (DD-MM-YYYY)</label>
+                                <label for="revenue-date" class="block text-sm font-medium text-gemini-gray-700">Date (DD-MM-YYYY)</label>
                                 <input type="text" id="revenue-date" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                                 <p class="mt-1 text-xs text-gray-500">Formato: DD-MM-YYYY (ej: 25-12-2024). Dejar vacío para fecha actual.</p>
                             </div>
                             <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
-                                Guardar Ingreso
+                                Save Revenue
                             </button>
                         </form>
                         <hr class="my-6">
                         <div class="flex justify-between items-center mb-2">
-                            <h4 class="font-semibold">Ingresos</h4>
+                            <h4 class="font-semibold">Revenue</h4>
                             <button onclick="loadAllFinances()" class="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600">Ver Todos</button>
                         </div>
                         <ul id="recent-revenue-list" class="divide-y divide-gemini-gray-200">
@@ -463,20 +463,20 @@
                         </ul>
                     </div>
 
-                    <!-- Columna de Costos -->
+                    <!-- Costs Column -->
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-semibold mb-4 text-xl text-red-700">Añadir Costo / Gasto</h3>
+                        <h3 class="font-semibold mb-4 text-xl text-red-700">Add Cost / Expense</h3>
                         <form id="form-add-cost">
                             <div class="mb-4">
-                                <label for="cost-description" class="block text-sm font-medium text-gemini-gray-700">Descripción</label>
+                                <label for="cost-description" class="block text-sm font-medium text-gemini-gray-700">Description</label>
                                 <input type="text" id="cost-description" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                             </div>
                             <div class="mb-4">
-                                <label for="cost-amount" class="block text-sm font-medium text-gemini-gray-700">Monto</label>
+                                <label for="cost-amount" class="block text-sm font-medium text-gemini-gray-700">Amount</label>
                                 <input type="number" id="cost-amount" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                             </div>
                             <div class="mb-4">
-                                <label for="cost-category" class="block text-sm font-medium text-gemini-gray-700">Categoría</label>
+                                <label for="cost-category" class="block text-sm font-medium text-gemini-gray-700">Category</label>
                                 <select id="cost-category" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                                     <option value="Materia Prima">Materia Prima</option>
                                     <option value="Logística">Logística</option>
@@ -486,17 +486,17 @@
                                 </select>
                             </div>
                             <div class="mb-4">
-                                <label for="cost-date" class="block text-sm font-medium text-gemini-gray-700">Fecha (DD-MM-YYYY)</label>
+                                <label for="cost-date" class="block text-sm font-medium text-gemini-gray-700">Date (DD-MM-YYYY)</label>
                                 <input type="text" id="cost-date" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                                 <p class="mt-1 text-xs text-gray-500">Formato: DD-MM-YYYY (ej: 25-12-2024). Dejar vacío para fecha actual.</p>
                             </div>
                             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
-                                Guardar Costo
+                                Save Cost
                             </button>
                         </form>
                         <hr class="my-6">
                         <div class="flex justify-between items-center mb-2">
-                            <h4 class="font-semibold">Costos</h4>
+                            <h4 class="font-semibold">Costs</h4>
                             <button onclick="loadAllFinances()" class="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600">Ver Todos</button>
                         </div>
                         <ul id="recent-costs-list" class="divide-y divide-gemini-gray-200">
@@ -506,47 +506,47 @@
                 </div>
             </div>
 
-            <!-- Modal para Nueva/Editar Venta -->
+            <!-- Modal for New/Edit Sale -->
             <div id="addSaleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-                    <h3 class="text-xl font-semibold mb-4" id="sale-modal-title">Nueva Venta</h3>
+                    <h3 class="text-xl font-semibold mb-4" id="sale-modal-title">New Sale</h3>
                     <form id="form-add-sale">
                         <input type="hidden" id="sale-id" value="">
                         <div class="mb-4">
                             <label for="sale-product" class="block text-sm font-medium text-gemini-gray-700">Producto</label>
                             <select id="sale-product" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
-                                <option value="">Cargando productos...</option>
+                                <option value="">Loading products...</option>
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label for="sale-quantity" class="block text-sm font-medium text-gemini-gray-700">Cantidad</label>
+                            <label for="sale-quantity" class="block text-sm font-medium text-gemini-gray-700">Quantity</label>
                             <input type="number" id="sale-quantity" step="0.01" min="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                         </div>
                         <div class="mb-4">
-                            <label for="sale-unit-price" class="block text-sm font-medium text-gemini-gray-700">Precio Unitario</label>
+                            <label for="sale-unit-price" class="block text-sm font-medium text-gemini-gray-700">Unit Price</label>
                             <input type="number" id="sale-unit-price" step="0.01" min="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                         </div>
                         <div class="mb-4">
-                            <label for="sale-date" class="block text-sm font-medium text-gemini-gray-700">Fecha (DD-MM-YYYY)</label>
+                            <label for="sale-date" class="block text-sm font-medium text-gemini-gray-700">Date (DD-MM-YYYY)</label>
                             <input type="text" id="sale-date" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                             <p class="mt-1 text-xs text-gray-500">Dejar vacío para fecha actual.</p>
                         </div>
                         <div class="flex justify-end space-x-2">
                             <button type="button" onclick="closeAddSaleModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Cancelar
+                                Cancel
                             </button>
                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Guardar Venta
+                                Save Sale
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Modal para Editar Producto -->
+            <!-- Modal for Edit Product -->
             <div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
                 <div class="bg-white p-6 rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto">
-                    <h3 class="text-xl font-semibold mb-4">Editar Producto</h3>
+                    <h3 class="text-xl font-semibold mb-4">Edit Product</h3>
                     <form id="form-edit-product">
                         <input type="hidden" id="edit-product-id" value="">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -559,98 +559,98 @@
                                 <input type="text" id="edit-product-name" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
                             </div>
                             <div>
-                                <label for="edit-product-type" class="block text-sm font-medium text-gemini-gray-700">Tipo de Producto</label>
+                                <label for="edit-product-type" class="block text-sm font-medium text-gemini-gray-700">Product Type</label>
                                 <select id="edit-product-type" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                    <option value="hijo">Insumo / Hijo</option>
-                                    <option value="final">Producto Final</option>
-                                    <option value="padre">Sub-ensamblaje / Padre</option>
-                                    <option value="otro">Otro</option>
+                                    <option value="hijo">Component / Child</option>
+                                    <option value="final">Final Product</option>
+                                    <option value="padre">Sub-assembly / Parent</option>
+                                    <option value="otro">Other</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="edit-product-supplier" class="block text-sm font-medium text-gemini-gray-700">Proveedor</label>
-                                <input type="text" id="edit-product-supplier" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Nombre del proveedor">
+                                <label for="edit-product-supplier" class="block text-sm font-medium text-gemini-gray-700">Supplier</label>
+                                <input type="text" id="edit-product-supplier" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Supplier name">
                             </div>
                             <div>
-                                <label for="edit-product-cost" class="block text-sm font-medium text-gemini-gray-700">Costo Unitario</label>
+                                <label for="edit-product-cost" class="block text-sm font-medium text-gemini-gray-700">Unit Cost</label>
                                 <div class="flex items-center space-x-2">
                                     <input type="number" id="edit-product-cost" value="0" step="0.01" class="mt-1 block flex-1 rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                    <button type="button" onclick="calculateCostFromBOMEdit()" class="mt-1 text-xs bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700" title="Calcular costo basado en BOM">💰</button>
+                                    <button type="button" onclick="calculateCostFromBOMEdit()" class="mt-1 text-xs bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700" title="Calculate cost based on BOM">💰</button>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-500">Costo final = Costo de materiales + Costo adicional</p>
+                                <p class="mt-1 text-xs text-gray-500">Final cost = Materials cost + Additional cost</p>
                             </div>
                             <div>
-                                <label for="edit-product-additional-cost" class="block text-sm font-medium text-gemini-gray-700">Costo Adicional</label>
+                                <label for="edit-product-additional-cost" class="block text-sm font-medium text-gemini-gray-700">Additional Cost</label>
                                 <input type="number" id="edit-product-additional-cost" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <p class="mt-1 text-xs text-gray-500">Costos adicionales (mano de obra, overhead, etc.)</p>
+                                <p class="mt-1 text-xs text-gray-500">Additional costs (labor, overhead, etc.)</p>
                             </div>
                             <div>
-                                <label for="edit-product-stock" class="block text-sm font-medium text-gemini-gray-700">Stock Actual</label>
+                                <label for="edit-product-stock" class="block text-sm font-medium text-gemini-gray-700">Current Stock</label>
                                 <input type="number" id="edit-product-stock" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <p class="mt-1 text-xs text-gray-500" id="edit-stock-unit-hint">En unidades o gramos según el tipo seleccionado</p>
+                                <p class="mt-1 text-xs text-gray-500" id="edit-stock-unit-hint">In units or grams according to selected type</p>
                             </div>
                             <div>
-                                <label for="edit-product-min-stock" class="block text-sm font-medium text-gemini-gray-700">Stock Mínimo</label>
+                                <label for="edit-product-min-stock" class="block text-sm font-medium text-gemini-gray-700">Min Stock</label>
                                 <input type="number" id="edit-product-min-stock" value="0" step="0.01" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                                <p class="mt-1 text-xs text-gray-500" id="edit-min-stock-unit-hint">En unidades o gramos según el tipo seleccionado</p>
+                                <p class="mt-1 text-xs text-gray-500" id="edit-min-stock-unit-hint">In units or grams according to selected type</p>
                             </div>
                             <div>
-                                <label for="edit-product-stock-unit-type" class="block text-sm font-medium text-gemini-gray-700">Tipo de Medición de Stock</label>
+                                <label for="edit-product-stock-unit-type" class="block text-sm font-medium text-gemini-gray-700">Stock Measurement Type</label>
                                 <select id="edit-product-stock-unit-type" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" onchange="updateEditStockUnitHints()">
-                                    <option value="units">Unidades</option>
-                                    <option value="grams">Gramos</option>
+                                    <option value="units">Units</option>
+                                    <option value="grams">Grams</option>
                                 </select>
-                                <p class="mt-1 text-xs text-gray-500">Unidades: cuenta por piezas. Gramos: cuenta por peso.</p>
+                                <p class="mt-1 text-xs text-gray-500">Units: count by pieces. Grams: count by weight.</p>
                             </div>
                             <div>
-                                <label for="edit-product-weight" class="block text-sm font-medium text-gemini-gray-700">Gramaje por Unidad (g)</label>
-                                <input type="number" id="edit-product-weight" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Gramos por unidad">
-                                <p class="mt-1 text-xs text-gray-500">Solo aplica si el stock se mide en unidades.</p>
+                                <label for="edit-product-weight" class="block text-sm font-medium text-gemini-gray-700">Weight per Unit (g)</label>
+                                <input type="number" id="edit-product-weight" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" placeholder="Grams per unit">
+                                <p class="mt-1 text-xs text-gray-500">Only applies if stock is measured in units.</p>
                             </div>
                             <div>
-                                <label for="edit-product-purchase-date" class="block text-sm font-medium text-gemini-gray-700">Fecha de Compra</label>
+                                <label for="edit-product-purchase-date" class="block text-sm font-medium text-gemini-gray-700">Purchase Date</label>
                                 <input type="date" id="edit-product-purchase-date" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                             </div>
                             <div>
-                                <label for="edit-product-exit-date" class="block text-sm font-medium text-gemini-gray-700">Fecha de Salida</label>
+                                <label for="edit-product-exit-date" class="block text-sm font-medium text-gemini-gray-700">Exit Date</label>
                                 <input type="date" id="edit-product-exit-date" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
                             </div>
                         </div>
                         <div class="flex justify-end space-x-2 mt-6">
                             <button type="button" onclick="closeEditProductModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Cancelar
+                                Cancel
                             </button>
                             <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Guardar Cambios
+                                Save Changes
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Modal para Múltiples Ventas -->
+            <!-- Modal for Multiple Sales -->
             <div id="addMultipleSalesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
                 <div class="bg-white p-6 rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto">
-                    <h3 class="text-xl font-semibold mb-4">Agregar Múltiples Ventas</h3>
+                    <h3 class="text-xl font-semibold mb-4">Add Multiple Sales</h3>
                     <div id="multiple-sales-container" class="space-y-4 mb-4">
                         <!-- Las filas de ventas se agregarán aquí dinámicamente -->
                     </div>
                     <div class="flex justify-between mb-4">
                         <button onclick="addSaleRow()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                            + Agregar Fila
+                            + Add Row
                         </button>
                     </div>
                     <div class="mb-4">
-                        <label for="multiple-sales-date" class="block text-sm font-medium text-gemini-gray-700">Fecha Común (DD-MM-YYYY) - Opcional</label>
+                        <label for="multiple-sales-date" class="block text-sm font-medium text-gemini-gray-700">Common Date (DD-MM-YYYY) - Optional</label>
                         <input type="text" id="multiple-sales-date" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" class="mt-1 block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue">
-                        <p class="mt-1 text-xs text-gray-500">Si se especifica, se aplicará a todas las ventas. Dejar vacío para fecha actual.</p>
+                        <p class="mt-1 text-xs text-gray-500">If specified, will apply to all sales. Leave empty for current date.</p>
                     </div>
                     <div class="flex justify-end space-x-2">
                         <button type="button" onclick="closeAddMultipleSalesModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                            Cancelar
+                            Cancel
                         </button>
                         <button onclick="saveMultipleSales()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                            Guardar Todas las Ventas
+                            Save All Sales
                         </button>
                     </div>
                 </div>
@@ -681,18 +681,18 @@
                 link.classList.remove('text-gemini-blue-dark', 'font-medium', 'bg-gemini-blue-light');
             });
             
-            // Mostrar la vista seleccionada
+            // Show selected view
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             // Marcar link como activo
             const activeLink = document.querySelector(`.nav-link[onclick="showView('${viewId}')"]`);
             activeLink.classList.add('text-gemini-blue-dark', 'font-medium', 'bg-gemini-blue-light');
 
-            currentView = viewId; // Actualizar vista actual
-            reloadDataInCurrentView(); // Cargar datos
+            currentView = viewId; // Update current view
+            reloadDataInCurrentView(); // Load data
         }
 
         function reloadDataInCurrentView() {
-            // Cargar datos específicos de la vista
+            // Load view-specific data
             if (currentView === 'dashboard') {
                 loadDashboardData();
             }
@@ -702,7 +702,7 @@
             if (currentView === 'mrp') {
                 loadMrpData();
             }
-            // Cargar datos de finanzas
+            // Load finance data
             if (currentView === 'finanzas') {
                 loadFinanzasData();
                 loadSalesData();
@@ -739,19 +739,19 @@
             }
         }
         
-        // Inicializar hints al cargar
+        // Initialize hints on load
         document.addEventListener('DOMContentLoaded', function() {
             const stockUnitTypeSelect = document.getElementById('product_stock_unit_type');
             if (stockUnitTypeSelect) {
                 stockUnitTypeSelect.addEventListener('change', updateStockUnitHints);
-                updateStockUnitHints(); // Inicializar
+                updateStockUnitHints(); // Initialize
             }
         });
 
         document.getElementById('form-add-product').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Si estamos editando, usar la función de actualización
+            // If we're editing, use the update function
             if (editingProductId !== null) {
                 const name = document.getElementById('product_name').value;
                 const type = document.getElementById('product_type').value;
@@ -774,7 +774,7 @@
                     e.target.reset();
                     editingProductId = null;
                     const submitBtn = e.target.querySelector('button[type="submit"]');
-                    submitBtn.textContent = 'Guardar Producto';
+                    submitBtn.textContent = 'Save Product';
                 }
                 return;
             }
@@ -798,8 +798,8 @@
             
             if (result.success) {
                 showNotification(result.message);
-                loadInventoryData(); // Recargar la lista
-                e.target.reset(); // Limpiar formulario
+                loadInventoryData(); // Reload list
+                e.target.reset(); // Clear form
             } else {
                 showNotification(`Error: ${result.message}`);
             }
@@ -819,7 +819,7 @@
             tbody.innerHTML = ''; // Limpiar lista
             
             if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="16" class="px-6 py-4 text-center text-gemini-gray-700">No hay productos en el inventario.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="16" class="px-6 py-4 text-center text-gemini-gray-700">No products in inventory.</td></tr>';
                 return;
             }
 
@@ -837,7 +837,7 @@
                 totalStock += p.stock;
                 totalValue += p.stock * (p.cost || 0);
 
-                // Formatear fechas
+                // Format dates
                 const formatDate = (dateStr) => {
                     if (!dateStr) return '-';
                     const date = new Date(dateStr);
@@ -854,7 +854,7 @@
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                             <div class="flex items-center space-x-1">
                                 <span id="cost-display-${p.id}" class="text-sm">$ ${(p.cost || 0).toFixed(2)}</span>
-                                <button onclick="editProductCost(${p.id})" class="text-xs bg-blue-500 text-white px-1 py-0.5 rounded hover:bg-blue-600" title="Editar costo">✏️</button>
+                                <button onclick="editProductCost(${p.id})" class="text-xs bg-blue-500 text-white px-1 py-0.5 rounded hover:bg-blue-600" title="Edit cost">✏️</button>
                             </div>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap font-semibold text-green-700 text-sm">
@@ -883,22 +883,22 @@
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                             <div class="flex flex-col space-y-1">
-                                <button onclick="showEditProductModal(${p.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600 whitespace-nowrap" title="Editar producto completo">✏️</button>
-                                <button onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 whitespace-nowrap" title="Eliminar producto">🗑️</button>
+                                <button onclick="showEditProductModal(${p.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600 whitespace-nowrap" title="Edit full product">✏️</button>
+                                <button onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 whitespace-nowrap" title="Delete product">🗑️</button>
                             </div>
                         </td>
                     </tr>
                 `;
             });
 
-            // Actualizar KPIs del dashboard (si los elementos existen)
+            // Update dashboard KPIs (if elements exist)
             const kpiStock = document.getElementById('kpi-total-stock');
             const kpiValue = document.getElementById('kpi-inventory-value');
 
             if (kpiStock) kpiStock.textContent = totalStock;
             if (kpiValue) kpiValue.textContent = `$ ${totalValue.toFixed(2)}`;
             
-            // Actualizar lista de productos con alerta
+            // Update products list with alerts
             updateStockAlertsList(products);
         }
         
@@ -909,7 +909,7 @@
             const productsWithAlerts = products.filter(p => p.stock < p.min_stock);
             
             if (productsWithAlerts.length === 0) {
-                alertsList.innerHTML = '<p class="text-green-600 font-medium">✓ No hay productos con alerta de stock bajo.</p>';
+                alertsList.innerHTML = '<p class="text-green-600 font-medium">✓ No products with low stock alert.</p>';
                 return;
             }
             
@@ -930,7 +930,7 @@
                         <div class="text-right">
                             <div class="text-xs text-red-700 font-medium">Faltan ${(p.min_stock - p.stock).toFixed(2)} ${unitLabel}</div>
                             <button onclick="showEditProductModal(${p.id})" class="mt-1 text-xs bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">
-                                Editar
+                                Edit
                             </button>
                         </div>
                     </div>
@@ -938,7 +938,7 @@
             });
         }
 
-        // Función para ajustar stock
+        // Function to adjust stock
         async function adjustStock(event, productId) {
             event.preventDefault();
             const inputEl = document.getElementById(`adjust-stock-input-${productId}`);
@@ -953,16 +953,16 @@
             showNotification(result.message);
             
             if (result.success) {
-                loadInventoryData(); // Recargar la lista de inventario
+                loadInventoryData(); // Reload list de inventario
             }
         }
 
-        // Función para editar producto (versión antigua - mantener para compatibilidad)
+        // Function to edit product (old version - keep for compatibility)
         async function editProduct(productId) {
             showEditProductModal(productId);
         }
         
-        // Función para mostrar modal de edición de producto
+        // Function to show product edit modal
         async function showEditProductModal(productId) {
             const result = await window.pywebview.api.load_products();
             if (!result.success) {
@@ -991,10 +991,10 @@
             document.getElementById('edit-product-stock-unit-type').value = product.stock_unit_type || 'units';
             document.getElementById('edit-product-additional-cost').value = product.additional_cost || 0;
             
-            // Actualizar hints
+            // Update hints
             updateEditStockUnitHints();
 
-            // Mostrar el modal
+            // Show modal
             document.getElementById('editProductModal').classList.remove('hidden');
         }
         
@@ -1016,12 +1016,12 @@
             }
         }
         
-        // Función para calcular costo desde BOM (formulario principal)
+        // Function to calculate cost from BOM (main form)
         async function calculateCostFromBOM() {
-            // Necesitamos el ID del producto, pero en el formulario de agregar no lo tenemos aún
-            // Solo podemos calcular si estamos editando
+            // We need the product ID, but in the add form we don't have it yet
+            // We can only calculate if we're editing
             if (editingProductId === null) {
-                showNotification('Primero guarda el producto y define su BOM, luego podrás calcular el costo automáticamente.');
+                showNotification('First save the product and define its BOM, then you can calculate the cost automatically.');
                 return;
             }
             
@@ -1037,11 +1037,11 @@
                 return;
             }
             
-            // Actualizar el costo calculado
+            // Update calculated cost
             document.getElementById('product_cost').value = data.calculated_cost.toFixed(2);
             document.getElementById('product_additional_cost').value = data.additional_cost.toFixed(2);
             
-            // Mostrar desglose
+            // Show breakdown
             let breakdown = `Costo calculado: $${data.calculated_cost.toFixed(2)}\n`;
             breakdown += `Materiales: $${data.materials_cost.toFixed(2)}\n`;
             breakdown += `Adicional: $${data.additional_cost.toFixed(2)}\n\n`;
@@ -1053,11 +1053,11 @@
             showNotification(breakdown);
         }
         
-        // Función para calcular costo desde BOM (modal de edición)
+        // Function to calculate cost from BOM (edit modal)
         async function calculateCostFromBOMEdit() {
             const productId = document.getElementById('edit-product-id').value;
             if (!productId) {
-                showNotification('Error: No se encontró el ID del producto.');
+                showNotification('Error: Product ID not found.');
                 return;
             }
             
@@ -1073,11 +1073,11 @@
                 return;
             }
             
-            // Actualizar el costo calculado
+            // Update calculated cost
             document.getElementById('edit-product-cost').value = data.calculated_cost.toFixed(2);
             document.getElementById('edit-product-additional-cost').value = data.additional_cost.toFixed(2);
             
-            // Mostrar desglose
+            // Show breakdown
             let breakdown = `Costo calculado: $${data.calculated_cost.toFixed(2)}\n`;
             breakdown += `Materiales: $${data.materials_cost.toFixed(2)}\n`;
             breakdown += `Adicional: $${data.additional_cost.toFixed(2)}\n\n`;
@@ -1089,7 +1089,7 @@
             showNotification(breakdown);
         }
         
-        // Event listener para el formulario de edición
+        // Event listener for edit form
         document.getElementById('form-edit-product').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1116,9 +1116,9 @@
             }
         });
 
-        // Función para eliminar producto
+        // Function to delete product
         async function deleteProduct(productId, productName) {
-            if (!confirm(`¿Estás seguro de que deseas eliminar el producto "${productName}"?`)) {
+            if (!confirm(`Are you sure you want to delete the product "${productName}"?`)) {
                 return;
             }
 
@@ -1130,7 +1130,7 @@
             }
         }
 
-        // Función para editar costo unitario rápidamente
+        // Function to quickly edit unit cost
         async function editProductCost(productId) {
             const result = await window.pywebview.api.load_products();
             if (!result.success) {
@@ -1144,8 +1144,8 @@
                 return;
             }
 
-            const newCost = prompt(`Editar costo unitario de "${product.name}":`, product.cost || 0);
-            if (newCost === null) return; // Usuario canceló
+            const newCost = prompt(`Edit unit cost of "${product.name}":`, product.cost || 0);
+            if (newCost === null) return; // User cancelled
 
             const costValue = parseFloat(newCost);
             if (isNaN(costValue) || costValue < 0) {
@@ -1153,7 +1153,7 @@
                 return;
             }
 
-            // Actualizar solo el costo usando update_product
+            // Update only cost using update_product
             const updateResult = await window.pywebview.api.update_product(
                 productId, 
                 product.name, 
@@ -1172,7 +1172,7 @@
             showNotification(updateResult.message);
             
             if (updateResult.success) {
-                loadInventoryData(); // Recargar la lista
+                loadInventoryData(); // Reload list
             }
         }
 
@@ -1187,16 +1187,16 @@
         async function loadDashboardData(period = 'month') {
             currentPeriod = period;
 
-            // Cargar datos financieros básicos
+            // Load basic financial data
             const result = await window.pywebview.api.get_kpi_data(period);
             if (!result.success) {
-                showNotification(`Error cargando KPIs: ${result.message}`);
+                showNotification(`Error loading KPIs: ${result.message}`);
                 return;
             }
             
             const data = result.data;
 
-            // 1. Actualizar KPIs de inventario
+            // 1. Update inventory KPIs
             const kpis = data.inventory_kpis;
             const kpiStock = document.getElementById('kpi-total-stock');
             const kpiValue = document.getElementById('kpi-inventory-value');
@@ -1204,13 +1204,13 @@
             if (kpiStock) kpiStock.textContent = kpis.total_stock_items;
             if (kpiValue) kpiValue.textContent = `$ ${kpis.total_inventory_value.toFixed(2)}`;
             
-            // Cargar productos para mostrar alertas
+            // Load products to show alerts
             const productsResult = await window.pywebview.api.load_products();
             if (productsResult.success) {
                 updateStockAlertsList(productsResult.data);
             }
 
-            // 2. Actualizar Gráfico Financiero con Utilidades
+            // 2. Update Financial Chart with Profits
             const financeData = data.financial_summary;
             const ctx = document.getElementById('kpiChart').getContext('2d');
             
@@ -1270,20 +1270,20 @@
                 }
             });
 
-            // 3. Cargar datos de BI
+            // 3. Load BI data
             await loadBIDashboardData();
         }
 
         async function loadBIDashboardData() {
             const result = await window.pywebview.api.get_bi_dashboard_data();
             if (!result.success) {
-                console.error('Error cargando datos de BI:', result.message);
+                console.error('Error loading BI data:', result.message);
                 return;
             }
 
             const biData = result.data;
 
-            // Actualizar métricas financieras
+            // Update financial metrics
             const metrics = biData.financial_metrics;
             const profitMarginEl = document.getElementById('kpi-profit-margin');
             const avgTicketEl = document.getElementById('kpi-avg-ticket');
@@ -1295,7 +1295,7 @@
             if (salesCountEl) salesCountEl.textContent = metrics.sales_count;
             if (monthProfitEl) monthProfitEl.textContent = `$ ${metrics.profit.toFixed(2)}`;
 
-            // Top 5 Productos Más Vendidos (Gráfico de Barras Horizontal)
+            // Top 5 Best Selling Products (Horizontal Bar Chart)
             const topSalesCtx = document.getElementById('topSalesChart').getContext('2d');
             if (topSalesChartInstance) {
                 topSalesChartInstance.destroy();
@@ -1329,7 +1329,7 @@
                 }
             });
 
-            // Top 5 Productos Más Rentables (Lista)
+            // Top 5 Most Profitable Products (List)
             const topProfitList = document.getElementById('topProfitabilityList');
             topProfitList.innerHTML = '';
             biData.top_profitability.forEach((p, index) => {
@@ -1347,7 +1347,7 @@
                 `;
             });
 
-            // Desglose de Gastos por Categoría (Gráfico de Dona)
+            // Cost Breakdown by Category (Donut Chart)
             const costBreakdownCtx = document.getElementById('costBreakdownChart').getContext('2d');
             if (costBreakdownChartInstance) {
                 costBreakdownChartInstance.destroy();
@@ -1375,7 +1375,7 @@
                 }
             });
 
-            // Valorización del Inventario por Categoría
+            // Inventory Valuation by Category
             const inventoryValuationCtx = document.getElementById('inventoryValuationChart').getContext('2d');
             if (inventoryValuationChartInstance) {
                 inventoryValuationChartInstance.destroy();
@@ -1412,7 +1412,7 @@
             const productsNoMovementList = document.getElementById('productsNoMovementList');
             productsNoMovementList.innerHTML = '';
             if (biData.products_no_movement.length === 0) {
-                productsNoMovementList.innerHTML = '<p class="text-gray-500">No hay productos sin movimiento.</p>';
+                productsNoMovementList.innerHTML = '<p class="text-gray-500">No products without movement.</p>';
             } else {
                 biData.products_no_movement.forEach(p => {
                     productsNoMovementList.innerHTML += `
@@ -1428,7 +1428,7 @@
             }
         }
         
-        // Listener para el selector de período (se inicializa cuando el DOM está listo)
+        // Listener for period selector (initialized when DOM is ready)
         function initPeriodSelector() {
             const periodSelector = document.getElementById('period-selector');
             if (periodSelector) {
@@ -1441,12 +1441,12 @@
         /* --- LÓGICA DE MRP y BOM --- */
 
         async function loadMrpData() {
-            // Cargar los <select> de productos
+            // Load product <select> elements
             const parentSelect = document.getElementById('mrp-select-parent');
             const childSelect = document.getElementById('mrp-select-child');
             const calculateSelect = document.getElementById('mrp-calculate-product');
 
-            // Cargar TODOS los productos para ambos selectores
+            // Load ALL products for both selectors
             // Cualquier producto puede ser padre o hijo
             const allProductsResult = await window.pywebview.api.load_products();
             
@@ -1473,7 +1473,7 @@
         async function calculateMRP() {
             const productId = document.getElementById('mrp-calculate-product').value;
             if (!productId) {
-                showNotification('Por favor, selecciona un producto para calcular.');
+                showNotification('Please select a product to calculate.');
                 return;
             }
             
@@ -1505,7 +1505,7 @@
                     const child_unit_type = comp.child_stock_unit_type || 'units';
                     const unit_label = child_unit_type === 'units' ? 'unidades' : 'g';
                     
-                    // Calcular cuántos se pueden producir
+                    // Calculate how many can be produced
                     let canProduce;
                     if (child_unit_type === 'units') {
                         canProduce = Math.floor(comp.child_stock / comp.required_quantity);
@@ -1532,7 +1532,7 @@
             resultDiv.innerHTML = html;
             resultDiv.classList.remove('hidden');
             
-            // Mostrar controles de producción si se pueden producir unidades
+            // Show production controls if units can be produced
             const productionControls = document.getElementById('mrp-production-controls');
             if (data.can_produce > 0) {
                 document.getElementById('mrp-production-quantity').max = data.can_produce;
@@ -1552,7 +1552,7 @@
                 return;
             }
             
-            if (!confirm(`¿Estás seguro de que deseas producir ${quantity} unidades? Esto reducirá el stock de los insumos y aumentará el stock del producto final.`)) {
+            if (!confirm(`Are you sure you want to produce ${quantity} units? This will reduce component stock and increase final product stock.`)) {
                 return;
             }
             
@@ -1560,9 +1560,9 @@
             showNotification(result.message);
             
             if (result.success) {
-                // Recalcular MRP para actualizar los valores
+                // Recalculate MRP to update values
                 await calculateMRP();
-                // Recargar inventario si estamos en esa vista
+                // Reload inventory if we're on that view
                 if (currentView === 'inventory') {
                     loadInventoryData();
                 }
@@ -1576,7 +1576,7 @@
                 document.getElementById('mrp-bom-list').innerHTML = '';
                 return;
             }
-            // Cargar el BOM para este producto
+            // Load BOM for this product
             loadBomList(parentId);
         });
 
@@ -1590,16 +1590,16 @@
                     bomListEl.innerHTML += `
                         <li class="flex justify-between items-center mb-1">
                             <span>${item.child_product_name} (x${item.quantity})</span>
-                            <button onclick="deleteBomEntry(${item.bom_id})" class="text-red-500 hover:text-red-700 text-xs">Eliminar</button>
+                            <button onclick="deleteBomEntry(${item.bom_id})" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
                         </li>
                     `;
                 });
             } else {
-                bomListEl.innerHTML = '<li>No hay insumos definidos para este producto.</li>';
+                bomListEl.innerHTML = '<li>No components defined for this product.</li>';
             }
         }
 
-        // Event listener para añadir un insumo al BOM
+        // Event listener to add a component to BOM
         document.getElementById('form-add-bom').addEventListener('submit', async function(e) {
             e.preventDefault();
             const parentId = document.getElementById('mrp-select-parent').value;
@@ -1607,13 +1607,13 @@
             const quantity = document.getElementById('mrp-child-quantity').value;
 
             if (!parentId || !childId) {
-                showNotification('Error: Debes seleccionar un producto padre y un componente.');
+                showNotification('Error: You must select a parent product and a component.');
                 return;
             }
             
             // Prevenir que un producto sea su propio hijo
             if (parentId === childId) {
-                showNotification('Error: Un producto no puede ser componente de sí mismo.');
+                showNotification('Error: A product cannot be a component of itself.');
                 return;
             }
 
@@ -1621,8 +1621,8 @@
             showNotification(result.message);
             
             if (result.success) {
-                loadBomList(parentId); // Recargar la lista de BOM
-                // Resetear formulario de añadir
+                loadBomList(parentId); // Reload BOM list
+                // Reset add form
                 document.getElementById('mrp-select-child').value = '';
                 document.getElementById('mrp-child-quantity').value = '1';
             }
@@ -1633,7 +1633,7 @@
             const result = await window.pywebview.api.delete_bom_entry(bomId);
             showNotification(result.message);
             if (result.success && parentId) {
-                loadBomList(parentId); // Recargar la lista
+                loadBomList(parentId); // Reload list
             }
         }
 
@@ -1687,14 +1687,14 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <span class="font-medium text-green-700">$ ${item.amount.toFixed(2)}</span>
-                                <button onclick="editRevenue(${item.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">Editar</button>
-                                <button onclick="deleteRevenue(${item.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Eliminar</button>
+                                <button onclick="editRevenue(${item.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">Edit</button>
+                                <button onclick="deleteRevenue(${item.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
                             </div>
                         </li>
                     `;
                 });
             } else {
-                revenueListEl.innerHTML = '<li class="py-2 text-gray-500">No hay ingresos.</li>';
+                revenueListEl.innerHTML = '<li class="py-2 text-gray-500">No revenue entries.</li>';
             }
 
             // Rellenar lista de costos
@@ -1710,8 +1710,8 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <span class="font-medium text-red-700">$ ${item.amount.toFixed(2)}</span>
-                                <button onclick="editCost(${item.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">Editar</button>
-                                <button onclick="deleteCost(${item.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Eliminar</button>
+                                <button onclick="editCost(${item.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">Edit</button>
+                                <button onclick="deleteCost(${item.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
                             </div>
                         </li>
                     `;
@@ -1793,7 +1793,7 @@
         }
 
         async function deleteRevenue(revenueId) {
-            if (!confirm("¿Estás seguro de que deseas eliminar este ingreso?")) {
+            if (!confirm("Are you sure you want to delete this revenue entry?")) {
                 return;
             }
 
@@ -1810,7 +1810,7 @@
         }
 
         async function deleteCost(costId) {
-            if (!confirm("¿Estás seguro de que deseas eliminar este costo?")) {
+            if (!confirm("Are you sure you want to delete this cost entry?")) {
                 return;
             }
 
@@ -1826,18 +1826,18 @@
             }
         }
 
-        // Función para convertir DD-MM-YYYY a YYYY-MM-DD
+        // Function to convert DD-MM-YYYY to YYYY-MM-DD
         function convertDateFormat(dateStr) {
             if (!dateStr || dateStr.trim() === '') return null;
             const parts = dateStr.split('-');
             if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                // Formato DD-MM-YYYY
-                return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convertir a YYYY-MM-DD
+                // Format DD-MM-YYYY
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert to YYYY-MM-DD
             }
             return null;
         }
 
-        // Listener para formulario de Ingresos
+        // Listener for Revenue form
         document.getElementById('form-add-revenue').addEventListener('submit', async function(e) {
             e.preventDefault();
             const description = document.getElementById('revenue-description').value;
@@ -1849,12 +1849,12 @@
             showNotification(result.message);
             
             if (result.success) {
-                loadFinanzasData(); // Recargar listas
-                e.target.reset(); // Limpiar formulario
+                loadFinanzasData(); // Reload lists
+                e.target.reset(); // Clear form
             }
         });
 
-        // Listener para formulario de Costos
+        // Listener for Costs form
         document.getElementById('form-add-cost').addEventListener('submit', async function(e) {
             e.preventDefault();
             const description = document.getElementById('cost-description').value;
@@ -1867,13 +1867,13 @@
             showNotification(result.message);
             
             if (result.success) {
-                loadFinanzasData(); // Recargar listas
-                e.target.reset(); // Limpiar formulario
+                loadFinanzasData(); // Reload lists
+                e.target.reset(); // Clear form
             }
         });
 
 
-        /* --- LÓGICA DE VENTAS --- */
+        /* --- SALES LOGIC --- */
         
         let saleRowCounter = 0;
         
@@ -1884,24 +1884,24 @@
             row.className = 'border rounded-lg p-4 bg-gray-50 relative';
             row.id = `sale-row-${saleRowCounter}`;
             row.innerHTML = `
-                <button onclick="removeSaleRow(${saleRowCounter})" class="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-full p-1.5 transition-colors" title="Eliminar esta fila">
+                <button onclick="removeSaleRow(${saleRowCounter})" class="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-full p-1.5 transition-colors" title="Remove this row">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pr-8">
                     <div>
-                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Producto</label>
+                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Product</label>
                         <select class="sale-row-product block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" required>
-                            <option value="">Selecciona...</option>
+                            <option value="">Select...</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Cantidad</label>
+                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Quantity</label>
                         <input type="number" class="sale-row-quantity block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" step="0.01" min="0.01" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Precio Unitario</label>
+                        <label class="block text-sm font-medium text-gemini-gray-700 mb-1">Unit Price</label>
                         <input type="number" class="sale-row-price block w-full rounded-md border-gemini-gray-300 shadow-sm focus:border-gemini-blue focus:ring-gemini-blue" step="0.01" min="0.01" required>
                     </div>
                     <div>
@@ -1912,10 +1912,10 @@
             `;
             container.appendChild(row);
             
-            // Cargar productos en el select
+            // Load products in select
             loadProductsForMultipleSales(row.querySelector('.sale-row-product'));
             
-            // Agregar listeners para calcular total
+            // Add listeners to calculate total
             const quantityInput = row.querySelector('.sale-row-quantity');
             const priceInput = row.querySelector('.sale-row-price');
             const totalInput = row.querySelector('.sale-row-total');
@@ -1933,12 +1933,12 @@
         function removeSaleRow(rowId) {
             const row = document.getElementById(`sale-row-${rowId}`);
             if (row) {
-                // Confirmar si hay más de una fila
+                // Confirm if there's more than one row
                 const container = document.getElementById('multiple-sales-container');
                 if (container.children.length > 1) {
                     row.remove();
                 } else {
-                    showNotification('Debe haber al menos una fila. Si quieres eliminar todo, cancela y vuelve a abrir el modal.');
+                    showNotification('There must be at least one row. If you want to delete everything, cancel and reopen the modal.');
                 }
             }
         }
@@ -1961,7 +1961,7 @@
             document.getElementById('addMultipleSalesModal').classList.remove('hidden');
             document.getElementById('multiple-sales-container').innerHTML = '';
             saleRowCounter = 0;
-            addSaleRow(); // Agregar primera fila por defecto
+            addSaleRow(); // Add first row by default
         }
         
         function closeAddMultipleSalesModal() {
@@ -1977,7 +1977,7 @@
             const date = convertDateFormat(commonDate);
             
             if (rows.length === 0) {
-                showNotification('Por favor, agrega al menos una venta.');
+                showNotification('Please add at least one sale.');
                 return;
             }
             
@@ -2010,12 +2010,12 @@
             }
             
             if (hasError) {
-                showNotification('Por favor, completa todos los campos de todas las filas.');
+                showNotification('Please complete all fields in all rows.');
                 return;
             }
             
             if (salesList.length === 0) {
-                showNotification('No hay ventas válidas para guardar.');
+                showNotification('No valid sales to save.');
                 return;
             }
             
@@ -2046,12 +2046,12 @@
             tbody.innerHTML = '';
             
             if (sales.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">No hay ventas registradas.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">No sales registered.</td></tr>';
                 return;
             }
             
             sales.forEach(s => {
-                const date = s.date ? new Date(s.date).toLocaleDateString('es-ES') : '-';
+                const date = s.date ? new Date(s.date).toLocaleDateString('en-US') : '-';
                 tbody.innerHTML += `
                     <tr>
                         <td class="px-4 py-3 whitespace-nowrap">${date}</td>
@@ -2060,8 +2060,8 @@
                         <td class="px-4 py-3 whitespace-nowrap">$ ${s.unit_price.toFixed(2)}</td>
                         <td class="px-4 py-3 whitespace-nowrap font-semibold">$ ${s.total_amount.toFixed(2)}</td>
                         <td class="px-4 py-3 whitespace-nowrap">
-                            <button onclick="editSale(${s.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-1">Editar</button>
-                            <button onclick="deleteSale(${s.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Eliminar</button>
+                            <button onclick="editSale(${s.id})" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-1">Edit</button>
+                            <button onclick="deleteSale(${s.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -2069,7 +2069,7 @@
         }
 
         async function deleteSale(saleId) {
-            if (!confirm("¿Estás seguro de que deseas eliminar esta venta?")) {
+            if (!confirm("Are you sure you want to delete this sale?")) {
                 return;
             }
             
@@ -2088,7 +2088,7 @@
 
         function showAddSaleModal() {
             editingSaleId = null;
-            document.getElementById('sale-modal-title').textContent = 'Nueva Venta';
+            document.getElementById('sale-modal-title').textContent = 'New Sale';
             document.getElementById('sale-id').value = '';
             document.getElementById('addSaleModal').classList.remove('hidden');
             loadProductsForSale();
@@ -2104,12 +2104,12 @@
             }
             
             const sale = result.data;
-            document.getElementById('sale-modal-title').textContent = 'Editar Venta';
+            document.getElementById('sale-modal-title').textContent = 'Edit Sale';
             document.getElementById('sale-id').value = sale.id;
             document.getElementById('sale-quantity').value = sale.quantity;
             document.getElementById('sale-unit-price').value = sale.unit_price;
             
-            // Formatear fecha para el input
+            // Format date for input
             if (sale.date) {
                 const date = new Date(sale.date);
                 const day = String(date.getDate()).padStart(2, '0');
@@ -2118,7 +2118,7 @@
                 document.getElementById('sale-date').value = `${day}-${month}-${year}`;
             }
             
-            // Cargar productos y seleccionar el correcto
+            // Load products and select the correct one
             await loadProductsForSale();
             document.getElementById('sale-product').value = sale.product_id;
             
@@ -2132,10 +2132,10 @@
         }
 
         async function loadProductsForSale() {
-            // Cargar todos los productos para ventas (cualquier producto puede venderse)
+            // Load all products for sales (any product can be sold)
             const result = await window.pywebview.api.load_products();
             const select = document.getElementById('sale-product');
-            select.innerHTML = '<option value="">Selecciona un producto...</option>';
+            select.innerHTML = '<option value="">Select a product...</option>';
             
             if (result.success) {
                 result.data.forEach(p => {
@@ -2157,16 +2157,16 @@
             const date = convertDateFormat(dateInput);
             
             if (!productId || !quantity || !unitPrice) {
-                showNotification("Por favor, completa todos los campos.");
+                showNotification("Please complete all fields.");
                 return;
             }
             
             let result;
             if (editingSaleId) {
-                // Actualizar venta existente
+                // Update existing sale
                 result = await window.pywebview.api.update_sale(editingSaleId, productId, productName, quantity, unitPrice, date);
             } else {
-                // Crear nueva venta
+                // Create new sale
                 result = await window.pywebview.api.add_sale(productId, productName, quantity, unitPrice, date);
             }
             
@@ -2184,18 +2184,18 @@
             }
         });
 
-        /* --- LÓGICA DE EXPORTACIÓN A EXCEL --- */
+        /* --- EXCEL EXPORT LOGIC --- */
         
         async function exportToExcel() {
-            showNotification('Iniciando exportación a Excel...');
+            showNotification('Starting Excel export...');
             window.pywebview.api.export_to_excel();
         }
         
         async function exportSalesReport(period) {
-            showNotification(`Exportando informe de ventas (${period})...`);
+            showNotification(`Exporting sales report (${period})...`);
             const result = await window.pywebview.api.export_sales_report(period);
             if (result.success) {
-                // El archivo se guardará y se notificará desde Python
+                // File will be saved and notified from Python
             }
             toggleSalesReportMenu(); // Cerrar menú
         }

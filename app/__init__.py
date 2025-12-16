@@ -1,2 +1,2 @@
-# Paquete app para OpenPYME ERP
+# Package app for OpenERP
 

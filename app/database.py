@@ -3,107 +3,107 @@ import os
 import sys
 
 """
-Este módulo maneja toda la interacción con la base de datos local SQLite.
-(Versión extendida con Costos de Producto y ajuste de stock)
+This module handles all interaction with the local SQLite database.
+(Extended version with Product Costs and stock adjustment)
 """
 
 def get_db_path():
     """
-    Obtiene la ruta correcta para el archivo de base de datos.
-    En macOS cuando se ejecuta desde .app bundle, usa el directorio del usuario.
+    Gets the correct path for the database file.
+    On macOS when running from .app bundle, uses the user's directory.
     """
     if getattr(sys, 'frozen', False):
-        # Ejecutándose desde un ejecutable compilado
+        # Running from a compiled executable
         if sys.platform == 'darwin' and '.app' in sys.executable:
-            # macOS: usar directorio Documents del usuario
-            db_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'OpenPYME_ERP')
+            # macOS: use user's Documents directory
+            db_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'OpenERP')
             os.makedirs(db_dir, exist_ok=True)
             return os.path.join(db_dir, 'erp_data.db')
         else:
-            # Windows/Linux: usar directorio del ejecutable
+            # Windows/Linux: use executable directory
             if hasattr(sys, '_MEIPASS'):
-                # PyInstaller: usar directorio del ejecutable, no _MEIPASS
+                # PyInstaller: use executable directory, not _MEIPASS
                 base_path = os.path.dirname(sys.executable)
             else:
                 base_path = os.path.dirname(os.path.abspath(sys.executable))
             return os.path.join(base_path, 'erp_data.db')
     else:
-        # Ejecutándose desde código fuente: usar directorio del proyecto
+        # Running from source code: use project directory
         base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         return os.path.join(base_path, 'erp_data.db')
 
 DB_FILE = get_db_path()
 
 def get_db_connection():
-    """Conecta a la base de datos SQLite."""
+    """Connects to the SQLite database."""
     conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row # Permite acceder a los resultados por nombre de columna
+    conn.row_factory = sqlite3.Row # Allows accessing results by column name
     return conn
 
 def init_db():
     """
-    Inicializa la base de datos.
-    Crea las tablas si no existen.
+    Initializes the database.
+    Creates tables if they don't exist.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # --- Tabla de Productos (Inventario) ---
-    # product_type: 'final' (para vender), 'hijo' (insumo), 'padre' (sub-ensamblaje), 'otro' (gastos)
-    # ¡NUEVO! Añadido campo 'cost', proveedor, fecha_compra, fecha_salida, SKU
+    # --- Products Table (Inventory) ---
+    # product_type: 'final' (to sell), 'hijo' (component), 'padre' (sub-assembly), 'otro' (expenses)
+    # NEW! Added 'cost' field, supplier, purchase_date, exit_date, SKU
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sku TEXT UNIQUE, -- Código SKU/ID del producto
+        sku TEXT UNIQUE, -- Product SKU/ID code
         name TEXT NOT NULL UNIQUE,
         product_type TEXT NOT NULL CHECK(product_type IN ('final', 'hijo', 'padre', 'otro')),
         stock REAL NOT NULL DEFAULT 0,
         min_stock REAL NOT NULL DEFAULT 0,
-        cost REAL NOT NULL DEFAULT 0, -- Costo unitario del producto
-        supplier TEXT, -- Proveedor
-        purchase_date DATE, -- Fecha de compra
-        exit_date DATE, -- Fecha de salida
+        cost REAL NOT NULL DEFAULT 0, -- Product unit cost
+        supplier TEXT, -- Supplier
+        purchase_date DATE, -- Purchase date
+        exit_date DATE, -- Exit date
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     ''')
     
-    # Migración: Agregar nuevas columnas si no existen (para bases de datos existentes)
+    # Migration: Add new columns if they don't exist (for existing databases)
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN cost REAL NOT NULL DEFAULT 0')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN supplier TEXT')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN purchase_date DATE')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN exit_date DATE')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN sku TEXT')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN weight REAL DEFAULT 0')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN stock_unit_type TEXT DEFAULT "units"')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
-    # Asegurar que stock_unit_type tenga valores válidos
+    # Ensure stock_unit_type has valid values
     try:
         cursor.execute('UPDATE products SET stock_unit_type = "units" WHERE stock_unit_type IS NULL OR stock_unit_type NOT IN ("units", "grams")')
     except sqlite3.OperationalError:
@@ -112,24 +112,24 @@ def init_db():
     try:
         cursor.execute('ALTER TABLE products ADD COLUMN additional_cost REAL DEFAULT 0')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
     
     conn.commit()
 
-    # --- Tabla de BOM (Bill of Materials) ---
-    # Define qué 'hijos' componen un 'padre' o 'final'.
+    # --- BOM (Bill of Materials) Table ---
+    # Defines which 'hijos' (children) compose a 'padre' (parent) or 'final'.
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS bill_of_materials (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        parent_product_id INTEGER NOT NULL, -- ID del producto 'final' o 'padre'
-        child_product_id INTEGER NOT NULL,  -- ID del producto 'hijo'
-        quantity REAL NOT NULL DEFAULT 1,   -- Cuántos 'hijos' se necesitan
+        parent_product_id INTEGER NOT NULL, -- ID of 'final' or 'padre' product
+        child_product_id INTEGER NOT NULL,  -- ID of 'hijo' product
+        quantity REAL NOT NULL DEFAULT 1,   -- How many 'hijos' are needed
         FOREIGN KEY (parent_product_id) REFERENCES products(id) ON DELETE CASCADE,
         FOREIGN KEY (child_product_id) REFERENCES products(id) ON DELETE CASCADE
     );
     ''')
     
-    # --- Tablas de Finanzas ---
+    # --- Finance Tables ---
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS revenue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -143,12 +143,12 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         description TEXT,
         amount REAL NOT NULL,
-        category TEXT DEFAULT 'Otros',
+        category TEXT DEFAULT 'Others',
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     ''')
     
-    # --- Tabla de Ventas (Historial de Ventas) ---
+    # --- Sales Table (Sales History) ---
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS sales (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,22 +162,22 @@ def init_db():
     );
     ''')
     
-    # Migración: Agregar columna category a costs si no existe
+    # Migration: Add category column to costs if it doesn't exist
     try:
-        cursor.execute('ALTER TABLE costs ADD COLUMN category TEXT DEFAULT "Otros"')
+        cursor.execute('ALTER TABLE costs ADD COLUMN category TEXT DEFAULT "Others"')
     except sqlite3.OperationalError:
-        pass  # La columna ya existe
+        pass  # Column already exists
 
     conn.commit()
     conn.close()
 
-# --- Funciones CRUD de Productos ---
+# --- Product CRUD Functions ---
 
 def add_product(name, product_type, stock, min_stock, cost, supplier=None, purchase_date=None, exit_date=None, sku=None, weight=0, stock_unit_type='units', additional_cost=0):
-    """Añade un nuevo producto al inventario (con costo, proveedor, fechas, SKU, gramaje, tipo de unidad de stock y costo adicional)."""
+    """Adds a new product to inventory (with cost, supplier, dates, SKU, weight, stock unit type and additional cost)."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Validar stock_unit_type
+    # Validate stock_unit_type
     if stock_unit_type not in ('units', 'grams'):
         stock_unit_type = 'units'
     cursor.execute(
@@ -189,8 +189,8 @@ def add_product(name, product_type, stock, min_stock, cost, supplier=None, purch
 
 def update_product_stock(product_id, quantity_change):
     """
-    ¡NUEVO! Ajusta el stock de un producto.
-    Usa un cambio relativo (ej: +5 o -3).
+    NEW! Adjusts a product's stock.
+    Uses a relative change (e.g.: +5 or -3).
     """
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -203,10 +203,10 @@ def update_product_stock(product_id, quantity_change):
 
 
 def update_product(product_id, name, product_type, stock, min_stock, cost, supplier=None, purchase_date=None, exit_date=None, sku=None, weight=0, stock_unit_type='units', additional_cost=0):
-    """Actualiza un producto existente en la base de datos (con costo, proveedor, fechas, SKU, gramaje, tipo de unidad de stock y costo adicional)."""
+    """Updates an existing product in the database (with cost, supplier, dates, SKU, weight, stock unit type and additional cost)."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Validar stock_unit_type
+    # Validate stock_unit_type
     if stock_unit_type not in ('units', 'grams'):
         stock_unit_type = 'units'
     cursor.execute(
@@ -217,51 +217,51 @@ def update_product(product_id, name, product_type, stock, min_stock, cost, suppl
     conn.close()
 
 def delete_product(product_id):
-    """Elimina un producto de la base de datos."""
+    """Deletes a product from the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Gracias a "ON DELETE CASCADE", esto también eliminará las entradas de BOM asociadas.
+    # Thanks to "ON DELETE CASCADE", this will also delete associated BOM entries.
     cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
     conn.commit()
     conn.close()
 
 def get_product_by_id(product_id):
-    """Obtiene un solo producto por su ID."""
+    """Gets a single product by its ID."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, sku, name, product_type, stock, min_stock, cost, supplier, purchase_date, exit_date, weight, stock_unit_type, additional_cost FROM products WHERE id = ?", (product_id,))
     product = dict(cursor.fetchone())
-    # Calcular peso total
+    # Calculate total weight
     if product['stock_unit_type'] == 'grams':
-        product['total_weight'] = product['stock']  # Ya está en gramos
+        product['total_weight'] = product['stock']  # Already in grams
     else:
-        product['total_weight'] = product['stock'] * (product['weight'] or 0)  # unidades * gramaje
-    # Asegurar que additional_cost existe
+        product['total_weight'] = product['stock'] * (product['weight'] or 0)  # units * weight
+    # Ensure additional_cost exists
     if 'additional_cost' not in product or product['additional_cost'] is None:
         product['additional_cost'] = 0
     conn.close()
     return product
 
 def get_all_products():
-    """Obtiene todos los productos del inventario (con costo, proveedor, fechas, SKU, gramaje, tipo de unidad de stock y costo adicional)."""
+    """Gets all products from inventory (with cost, supplier, dates, SKU, weight, stock unit type and additional cost)."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, sku, name, product_type, stock, min_stock, cost, supplier, purchase_date, exit_date, weight, stock_unit_type, additional_cost FROM products ORDER BY name ASC")
     products = [dict(row) for row in cursor.fetchall()]
-    # Calcular peso total para cada producto
+    # Calculate total weight for each product
     for product in products:
         if product['stock_unit_type'] == 'grams':
-            product['total_weight'] = product['stock']  # Ya está en gramos
+            product['total_weight'] = product['stock']  # Already in grams
         else:
-            product['total_weight'] = product['stock'] * (product['weight'] or 0)  # unidades * gramaje
-        # Asegurar que additional_cost existe
+            product['total_weight'] = product['stock'] * (product['weight'] or 0)  # units * weight
+        # Ensure additional_cost exists
         if 'additional_cost' not in product or product['additional_cost'] is None:
             product['additional_cost'] = 0
     conn.close()
     return products
 
 def get_products_by_type(product_type):
-    """Obtiene productos filtrados por tipo (ej: 'final', 'hijo')."""
+    """Gets products filtered by type (e.g.: 'final', 'hijo')."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, name FROM products WHERE product_type = ? ORDER BY name ASC", (product_type,))
@@ -269,10 +269,10 @@ def get_products_by_type(product_type):
     conn.close()
     return products
 
-# --- Funciones de BOM (Bill of Materials) ---
+# --- BOM (Bill of Materials) Functions ---
 
 def add_bom_entry(parent_product_id, child_product_id, quantity):
-    """Añade un insumo (hijo) a una lista de materiales (padre)."""
+    """Adds a component (child) to a bill of materials (parent)."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -284,8 +284,8 @@ def add_bom_entry(parent_product_id, child_product_id, quantity):
 
 def get_bom_for_product(parent_product_id):
     """
-    Obtiene la lista de materiales (BOM) para un producto padre/final.
-    Utiliza un JOIN para obtener los nombres de los productos hijos.
+    Gets the bill of materials (BOM) for a parent/final product.
+    Uses a JOIN to get child product names.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -306,13 +306,13 @@ def get_bom_for_product(parent_product_id):
 
 def calculate_bom_cost(product_id):
     """
-    Calcula el costo unitario de un producto basándose en su BOM (Bill of Materials).
-    Retorna el costo calculado, el desglose por componente y el costo adicional.
+    Calculates the unit cost of a product based on its BOM (Bill of Materials).
+    Returns the calculated cost, breakdown by component and additional cost.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Obtener el producto padre
+    # Get the parent product
     cursor.execute("SELECT id, name, cost, additional_cost FROM products WHERE id = ?", (product_id,))
     parent = cursor.fetchone()
     if not parent:
@@ -322,7 +322,7 @@ def calculate_bom_cost(product_id):
     parent = dict(parent)
     additional_cost = parent.get('additional_cost', 0) or 0
     
-    # Obtener todos los componentes del BOM con sus costos
+    # Get all BOM components with their costs
     cursor.execute("""
         SELECT 
             bom.id as bom_id,
@@ -348,10 +348,10 @@ def calculate_bom_cost(product_id):
             'materials_cost': 0,
             'additional_cost': additional_cost,
             'components': [],
-            'message': 'Este producto no tiene componentes definidos en el BOM. Solo costo adicional aplicado.'
+            'message': 'This product has no components defined in the BOM. Only additional cost applied.'
         }
     
-    # Calcular el costo total de materiales
+    # Calculate total materials cost
     total_materials_cost = 0
     component_breakdown = []
     
@@ -361,19 +361,19 @@ def calculate_bom_cost(product_id):
         child_unit_type = comp['child_stock_unit_type'] or 'units'
         child_weight = comp['child_weight'] or 0
         
-        # Calcular costo del componente
-        # Si el componente se mide en unidades, el costo es directo
-        # Si se mide en gramos, necesitamos considerar el costo por gramo
+        # Calculate component cost
+        # If component is measured in units, cost is direct
+        # If measured in grams, we need to consider cost per gram
         if child_unit_type == 'units':
             component_cost = child_cost * required_qty
         else:  # grams
-            # Si el costo está por unidad pero el stock está en gramos, necesitamos convertir
-            # Asumimos que el costo está por unidad, así que calculamos costo por gramo
+            # If cost is per unit but stock is in grams, we need to convert
+            # We assume cost is per unit, so we calculate cost per gram
             if child_weight > 0:
                 cost_per_gram = child_cost / child_weight
                 component_cost = cost_per_gram * required_qty
             else:
-                # Si no hay peso definido, asumimos que el costo ya está por gramo
+                # If no weight defined, we assume cost is already per gram
                 component_cost = child_cost * required_qty
         
         total_materials_cost += component_cost
@@ -386,7 +386,7 @@ def calculate_bom_cost(product_id):
             'total_cost': component_cost
         })
     
-    # Costo total = costo de materiales + costo adicional
+    # Total cost = materials cost + additional cost
     calculated_cost = total_materials_cost + additional_cost
     
     return {
@@ -397,11 +397,11 @@ def calculate_bom_cost(product_id):
         'additional_cost': additional_cost,
         'components': component_breakdown,
         'current_cost': parent.get('cost', 0),
-        'message': f'Costo calculado: ${calculated_cost:.2f} (Materiales: ${total_materials_cost:.2f} + Adicional: ${additional_cost:.2f})'
+        'message': f'Calculated cost: ${calculated_cost:.2f} (Materials: ${total_materials_cost:.2f} + Additional: ${additional_cost:.2f})'
     }
 
 def delete_bom_entry(bom_id):
-    """Elimina una entrada de la lista de materiales por su ID."""
+    """Deletes a bill of materials entry by its ID."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM bill_of_materials WHERE id = ?", (bom_id,))
@@ -410,14 +410,14 @@ def delete_bom_entry(bom_id):
 
 def calculate_mrp_production(product_id):
     """
-    Calcula cuántos productos se pueden fabricar basándose en el BOM y el inventario actual.
-    Maneja conversiones entre unidades discretas y continuas (gramos).
-    Retorna un diccionario con la información del cálculo.
+    Calculates how many products can be manufactured based on BOM and current inventory.
+    Handles conversions between discrete and continuous units (grams).
+    Returns a dictionary with calculation information.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Obtener el producto padre con su tipo de unidad
+    # Get the parent product with its unit type
     cursor.execute("SELECT id, name, stock, stock_unit_type FROM products WHERE id = ?", (product_id,))
     parent = cursor.fetchone()
     if not parent:
@@ -426,7 +426,7 @@ def calculate_mrp_production(product_id):
     
     parent = dict(parent)
     
-    # Obtener todos los componentes (hijos) del BOM con información de unidades
+    # Get all BOM components (children) with unit information
     cursor.execute("""
         SELECT 
             bom.id as bom_id,
@@ -451,11 +451,11 @@ def calculate_mrp_production(product_id):
             'product_name': parent['name'],
             'can_produce': parent['stock'],
             'components': [],
-            'message': 'Este producto no tiene componentes definidos en el BOM. Stock actual disponible.'
+            'message': 'This product has no components defined in the BOM. Current stock available.'
         }
     
-    # Calcular cuántos se pueden producir basándose en el componente más limitante
-    # Considerando conversiones entre unidades y gramos
+    # Calculate how many can be produced based on the most limiting component
+    # Considering conversions between units and grams
     max_production = None
     limiting_component = None
     
@@ -465,34 +465,34 @@ def calculate_mrp_production(product_id):
         child_weight = comp['child_weight'] or 0
         required_qty = comp['required_quantity']
         
-        # Convertir el stock disponible a gramos si es necesario
-        # El required_quantity siempre se interpreta en la misma unidad que el child_stock_unit_type
-        # Si el padre requiere en unidades y el hijo está en gramos, necesitamos convertir
+        # Convert available stock to grams if necessary
+        # required_quantity is always interpreted in the same unit as child_stock_unit_type
+        # If parent requires in units and child is in grams, we need to convert
         
-        # Caso 1: Ambos en unidades - cálculo directo
+        # Case 1: Both in units - direct calculation
         if child_unit_type == 'units':
             available_units = child_stock
             possible_production = available_units / required_qty if required_qty > 0 else 0
-        # Caso 2: Hijo en gramos, requerimiento en gramos - cálculo directo
+        # Case 2: Child in grams, requirement in grams - direct calculation
         elif child_unit_type == 'grams':
             available_grams = child_stock
-            # Si required_quantity está en gramos, cálculo directo
+            # If required_quantity is in grams, direct calculation
             possible_production = available_grams / required_qty if required_qty > 0 else 0
         else:
             # Fallback
             possible_production = child_stock / required_qty if required_qty > 0 else 0
         
-        # Agregar información de conversión al componente
+        # Add conversion information to component
         comp['available_in_grams'] = child_stock if child_unit_type == 'grams' else (child_stock * child_weight)
         comp['required_in_grams'] = required_qty if child_unit_type == 'grams' else (required_qty * child_weight)
-        comp['conversion_note'] = f"Stock: {child_stock} {child_unit_type}, Requerido: {required_qty} {child_unit_type}"
+        comp['conversion_note'] = f"Stock: {child_stock} {child_unit_type}, Required: {required_qty} {child_unit_type}"
         
         if max_production is None or possible_production < max_production:
             max_production = possible_production
             limiting_component = comp
     
-    # Redondear hacia abajo (no se pueden producir fracciones de unidades discretas)
-    # Pero permitir decimales si el producto padre se mide en gramos
+    # Round down (can't produce fractions of discrete units)
+    # But allow decimals if parent product is measured in grams
     if parent.get('stock_unit_type') == 'grams':
         max_production = max_production if max_production else 0
     else:
@@ -505,33 +505,33 @@ def calculate_mrp_production(product_id):
         'can_produce': max_production,
         'components': components,
         'limiting_component': limiting_component,
-        'message': f'Puedes producir {max_production} {"unidades" if parent.get("stock_unit_type") != "grams" else "gramos"} de {parent["name"]} con el inventario actual.'
+        'message': f'You can produce {max_production} {"units" if parent.get("stock_unit_type") != "grams" else "grams"} of {parent["name"]} with current inventory.'
     }
 
 def execute_production(product_id, quantity):
     """
-    Ejecuta la producción de un producto: reduce el stock de los insumos y aumenta el stock del producto final.
-    Retorna un diccionario con success y message.
+    Executes production of a product: reduces component stock and increases final product stock.
+    Returns a dictionary with success and message.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        # Obtener el nombre del producto
+        # Get product name
         cursor.execute("SELECT name FROM products WHERE id = ?", (product_id,))
         product_row = cursor.fetchone()
         if not product_row:
             conn.close()
-            return {'success': False, 'message': 'Producto no encontrado.'}
+            return {'success': False, 'message': 'Product not found.'}
         product_name = product_row['name']
         
-        # Verificar que se pueden producir la cantidad solicitada
+        # Verify that the requested quantity can be produced
         mrp_result = calculate_mrp_production(product_id)
         if not mrp_result or mrp_result['can_produce'] < quantity:
             conn.close()
-            return {'success': False, 'message': f'No hay suficientes insumos. Solo se pueden producir {mrp_result["can_produce"] if mrp_result else 0} unidades.'}
+            return {'success': False, 'message': f'Not enough components. Only {mrp_result["can_produce"] if mrp_result else 0} units can be produced.'}
         
-        # Obtener los componentes del BOM
+        # Get BOM components
         cursor.execute("""
             SELECT 
                 bom.child_product_id,
@@ -544,29 +544,29 @@ def execute_production(product_id, quantity):
         
         if not components:
             conn.close()
-            return {'success': False, 'message': 'Este producto no tiene componentes definidos en el BOM.'}
+            return {'success': False, 'message': 'This product has no components defined in the BOM.'}
         
-        # Reducir stock de cada insumo
+        # Reduce stock of each component
         for comp in components:
             child_id = comp['child_product_id']
             required_qty = comp['required_quantity'] * quantity
             cursor.execute("UPDATE products SET stock = stock - ? WHERE id = ?", (required_qty, child_id))
         
-        # Aumentar stock del producto final
+        # Increase final product stock
         cursor.execute("UPDATE products SET stock = stock + ? WHERE id = ?", (quantity, product_id))
         
         conn.commit()
         conn.close()
-        return {'success': True, 'message': f'Producción ejecutada: {quantity} unidades de {product_name} producidas.'}
+        return {'success': True, 'message': f'Production executed: {quantity} units of {product_name} produced.'}
     except Exception as e:
         conn.rollback()
         conn.close()
-        return {'success': False, 'message': f'Error al ejecutar producción: {str(e)}'}
+        return {'success': False, 'message': f'Error executing production: {str(e)}'}
 
-# --- Funciones de Finanzas ---
+# --- Finance Functions ---
 
 def add_revenue(description, amount, date=None):
-    """Añade un registro de ingreso."""
+    """Adds a revenue entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     if date:
@@ -576,8 +576,8 @@ def add_revenue(description, amount, date=None):
     conn.commit()
     conn.close()
 
-def add_cost(description, amount, date=None, category='Otros'):
-    """Añade un registro de costo."""
+def add_cost(description, amount, date=None, category='Others'):
+    """Adds a cost entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     if date:
@@ -588,7 +588,7 @@ def add_cost(description, amount, date=None, category='Otros'):
     conn.close()
 
 def get_recent_revenue(limit=10):
-    """Obtiene las entradas de ingresos más recientes."""
+    """Gets the most recent revenue entries."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, description, amount, date FROM revenue ORDER BY date DESC LIMIT ?", (limit,))
@@ -597,7 +597,7 @@ def get_recent_revenue(limit=10):
     return revenue_entries
 
 def get_all_revenue():
-    """Obtiene todas las entradas de ingresos."""
+    """Gets all revenue entries."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, description, amount, date FROM revenue ORDER BY date DESC")
@@ -606,7 +606,7 @@ def get_all_revenue():
     return revenue_entries
 
 def get_recent_costs(limit=10):
-    """Obtiene las entradas de costos más recientes."""
+    """Gets the most recent cost entries."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, description, amount, category, date FROM costs ORDER BY date DESC LIMIT ?", (limit,))
@@ -615,7 +615,7 @@ def get_recent_costs(limit=10):
     return cost_entries
 
 def get_all_costs():
-    """Obtiene todas las entradas de costos."""
+    """Gets all cost entries."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, description, amount, category, date FROM costs ORDER BY date DESC")
@@ -624,7 +624,7 @@ def get_all_costs():
     return cost_entries
 
 def update_revenue(revenue_id, description, amount, date=None):
-    """Actualiza un registro de ingreso."""
+    """Updates a revenue entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     if date:
@@ -634,8 +634,8 @@ def update_revenue(revenue_id, description, amount, date=None):
     conn.commit()
     conn.close()
 
-def update_cost(cost_id, description, amount, date=None, category='Otros'):
-    """Actualiza un registro de costo."""
+def update_cost(cost_id, description, amount, date=None, category='Others'):
+    """Updates a cost entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     if date:
@@ -646,7 +646,7 @@ def update_cost(cost_id, description, amount, date=None, category='Otros'):
     conn.close()
 
 def delete_revenue(revenue_id):
-    """Elimina un registro de ingreso."""
+    """Deletes a revenue entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM revenue WHERE id = ?", (revenue_id,))
@@ -654,7 +654,7 @@ def delete_revenue(revenue_id):
     conn.close()
 
 def delete_cost(cost_id):
-    """Elimina un registro de costo."""
+    """Deletes a cost entry."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM costs WHERE id = ?", (cost_id,))
@@ -663,13 +663,13 @@ def delete_cost(cost_id):
 
 def get_financial_summary(period='month'):
     """
-    Obtiene un resumen de ingresos, costos y utilidades por período.
-    period puede ser: 'day', 'week', 'month', 'year'
+    Gets a summary of revenue, costs and profits by period.
+    period can be: 'day', 'week', 'month', 'year'
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Determinar formato de fecha según el período
+    # Determine date format according to period
     date_format_map = {
         'day': '%Y-%m-%d',
         'week': '%Y-W%W',
@@ -678,42 +678,42 @@ def get_financial_summary(period='month'):
     }
     date_format = date_format_map.get(period, '%Y-%m')
     
-    # Query de ingresos
+    # Revenue query
     cursor.execute(f"SELECT strftime('{date_format}', date) as period, SUM(amount) as total FROM revenue GROUP BY period ORDER BY period")
     revenue_data = {row['period']: row['total'] for row in cursor.fetchall()}
     
-    # Query de costos
+    # Costs query
     cursor.execute(f"SELECT strftime('{date_format}', date) as period, SUM(amount) as total FROM costs GROUP BY period ORDER BY period")
     costs_data = {row['period']: row['total'] for row in cursor.fetchall()}
 
     conn.close()
     
-    # Combinar datos
+    # Combine data
     all_periods = sorted(list(set(revenue_data.keys()) | set(costs_data.keys())))
     
-    # Devolver estructura vacía si no hay datos
+    # Return empty structure if no data
     if not all_periods:
         return {'labels': [], 'revenue': [], 'costs': [], 'profit': []}
 
     labels = list(all_periods)
     revenue = [revenue_data.get(period, 0) for period in all_periods]
     costs = [costs_data.get(period, 0) for period in all_periods]
-    profit = [revenue[i] - costs[i] for i in range(len(labels))]  # Calcular utilidades
+    profit = [revenue[i] - costs[i] for i in range(len(labels))]  # Calculate profits
 
     return {'labels': labels, 'revenue': revenue, 'costs': costs, 'profit': profit}
 
-# --- Funciones de Ventas ---
+# --- Sales Functions ---
 
 def add_sale(product_id, product_name, quantity, unit_price, date=None):
-    """Añade una venta al historial."""
+    """Adds a sale to the history."""
     conn = get_db_connection()
     cursor = conn.cursor()
     total_amount = float(quantity) * float(unit_price)
     
-    # Actualizar stock del producto
+    # Update product stock
     cursor.execute("UPDATE products SET stock = stock - ? WHERE id = ?", (quantity, product_id))
     
-    # Registrar la venta
+    # Register the sale
     if date:
         cursor.execute("INSERT INTO sales (product_id, product_name, quantity, unit_price, total_amount, date) VALUES (?, ?, ?, ?, ?, ?)",
                       (product_id, product_name, quantity, unit_price, total_amount, date))
@@ -721,21 +721,21 @@ def add_sale(product_id, product_name, quantity, unit_price, date=None):
         cursor.execute("INSERT INTO sales (product_id, product_name, quantity, unit_price, total_amount) VALUES (?, ?, ?, ?, ?)",
                       (product_id, product_name, quantity, unit_price, total_amount))
     
-    # Registrar también en revenue
+    # Also register in revenue
     if date:
         cursor.execute("INSERT INTO revenue (description, amount, date) VALUES (?, ?, ?)",
-                      (f"Venta: {product_name} x{quantity}", total_amount, date))
+                      (f"Sale: {product_name} x{quantity}", total_amount, date))
     else:
         cursor.execute("INSERT INTO revenue (description, amount) VALUES (?, ?)",
-                      (f"Venta: {product_name} x{quantity}", total_amount))
+                      (f"Sale: {product_name} x{quantity}", total_amount))
     
     conn.commit()
     conn.close()
 
 def add_multiple_sales(sales_list):
     """
-    Añade múltiples ventas al historial.
-    sales_list es una lista de diccionarios con: product_id, product_name, quantity, unit_price, date (opcional)
+    Adds multiple sales to the history.
+    sales_list is a list of dictionaries with: product_id, product_name, quantity, unit_price, date (optional)
     """
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -751,10 +751,10 @@ def add_multiple_sales(sales_list):
             total_amount = quantity * unit_price
             total_revenue += total_amount
             
-            # Actualizar stock del producto
+            # Update product stock
             cursor.execute("UPDATE products SET stock = stock - ? WHERE id = ?", (quantity, product_id))
             
-            # Registrar la venta
+            # Register the sale
             if date:
                 cursor.execute("INSERT INTO sales (product_id, product_name, quantity, unit_price, total_amount, date) VALUES (?, ?, ?, ?, ?, ?)",
                               (product_id, product_name, quantity, unit_price, total_amount, date))
@@ -762,24 +762,24 @@ def add_multiple_sales(sales_list):
                 cursor.execute("INSERT INTO sales (product_id, product_name, quantity, unit_price, total_amount) VALUES (?, ?, ?, ?, ?)",
                               (product_id, product_name, quantity, unit_price, total_amount))
             
-            # Registrar también en revenue
+            # Also register in revenue
             if date:
                 cursor.execute("INSERT INTO revenue (description, amount, date) VALUES (?, ?, ?)",
-                              (f"Venta: {product_name} x{quantity}", total_amount, date))
+                              (f"Sale: {product_name} x{quantity}", total_amount, date))
             else:
                 cursor.execute("INSERT INTO revenue (description, amount) VALUES (?, ?)",
-                              (f"Venta: {product_name} x{quantity}", total_amount))
+                              (f"Sale: {product_name} x{quantity}", total_amount))
         
         conn.commit()
         conn.close()
-        return {'success': True, 'message': f'{len(sales_list)} ventas registradas correctamente. Total: ${total_revenue:.2f}'}
+        return {'success': True, 'message': f'{len(sales_list)} sales registered successfully. Total: ${total_revenue:.2f}'}
     except Exception as e:
         conn.rollback()
         conn.close()
-        return {'success': False, 'message': f'Error al registrar ventas: {str(e)}'}
+        return {'success': False, 'message': f'Error registering sales: {str(e)}'}
 
 def get_all_sales():
-    """Obtiene todas las ventas."""
+    """Gets all sales."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, product_id, product_name, quantity, unit_price, total_amount, date FROM sales ORDER BY date DESC")
@@ -788,7 +788,7 @@ def get_all_sales():
     return sales
 
 def get_recent_sales(limit=10):
-    """Obtiene las ventas más recientes."""
+    """Gets the most recent sales."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, product_id, product_name, quantity, unit_price, total_amount, date FROM sales ORDER BY date DESC LIMIT ?", (limit,))
@@ -797,7 +797,7 @@ def get_recent_sales(limit=10):
     return sales
 
 def get_sale_by_id(sale_id):
-    """Obtiene una venta por su ID."""
+    """Gets a sale by its ID."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, product_id, product_name, quantity, unit_price, total_amount, date FROM sales WHERE id = ?", (sale_id,))
@@ -808,24 +808,24 @@ def get_sale_by_id(sale_id):
     return None
 
 def update_sale(sale_id, product_id, product_name, quantity, unit_price, date=None):
-    """Actualiza una venta existente."""
+    """Updates an existing sale."""
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Obtener la venta original
+    # Get original sale
     original_sale = get_sale_by_id(sale_id)
     if not original_sale:
         conn.close()
-        raise ValueError("Venta no encontrada")
+        raise ValueError("Sale not found")
     
-    # Calcular nuevo total
+    # Calculate new total
     new_total = float(quantity) * float(unit_price)
     
-    # Ajustar stock: restaurar el original y aplicar el nuevo
+    # Adjust stock: restore original and apply new
     quantity_diff = float(quantity) - original_sale['quantity']
     cursor.execute("UPDATE products SET stock = stock - ? WHERE id = ?", (quantity_diff, product_id))
     
-    # Actualizar la venta
+    # Update the sale
     if date:
         cursor.execute("""
             UPDATE sales 
@@ -839,8 +839,8 @@ def update_sale(sale_id, product_id, product_name, quantity, unit_price, date=No
             WHERE id = ?
         """, (product_id, product_name, quantity, unit_price, new_total, sale_id))
     
-    # Actualizar el ingreso asociado (buscar por descripción similar y fecha)
-    revenue_description = f"Venta: {product_name} x{quantity}"
+    # Update associated revenue (search by similar description and date)
+    revenue_description = f"Sale: {product_name} x{quantity}"
     cursor.execute("""
         UPDATE revenue 
         SET description = ?, amount = ?
@@ -848,36 +848,36 @@ def update_sale(sale_id, product_id, product_name, quantity, unit_price, date=No
             SELECT date FROM sales WHERE id = ?
         )
         LIMIT 1
-    """, (revenue_description, new_total, f"Venta: {original_sale['product_name']} x%", sale_id))
+    """, (revenue_description, new_total, f"Sale: {original_sale['product_name']} x%", sale_id))
     
     conn.commit()
     conn.close()
 
 def delete_sale(sale_id):
-    """Elimina una venta y su ingreso asociado."""
+    """Deletes a sale and its associated revenue."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Obtener datos de la venta antes de eliminar
+    # Get sale data before deleting
     cursor.execute("SELECT product_id, quantity, total_amount, product_name, date FROM sales WHERE id = ?", (sale_id,))
     sale = cursor.fetchone()
     if sale:
-        # Restaurar stock
+        # Restore stock
         cursor.execute("UPDATE products SET stock = stock + ? WHERE id = ?", (sale['quantity'], sale['product_id']))
-        # Eliminar el ingreso asociado (buscar por descripción similar y fecha)
+        # Delete associated revenue (search by similar description and date)
         cursor.execute("""
             DELETE FROM revenue 
             WHERE description LIKE ? 
             AND amount = ?
             AND date = ?
-        """, (f"Venta: {sale['product_name']} x%", sale['total_amount'], sale['date']))
+        """, (f"Sale: {sale['product_name']} x%", sale['total_amount'], sale['date']))
     cursor.execute("DELETE FROM sales WHERE id = ?", (sale_id,))
     conn.commit()
     conn.close()
 
 def get_sales_by_period(period='month'):
     """
-    Obtiene ventas filtradas por período.
-    period puede ser: 'day', 'week', 'month', 'year'
+    Gets sales filtered by period.
+    period can be: 'day', 'week', 'month', 'year'
     """
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -917,10 +917,10 @@ def get_sales_by_period(period='month'):
     conn.close()
     return sales
 
-# --- Funciones de Business Intelligence ---
+# --- Business Intelligence Functions ---
 
 def get_top_products_by_sales(limit=5):
-    """Obtiene los top productos más vendidos por cantidad."""
+    """Gets the top products by sales quantity."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -935,7 +935,7 @@ def get_top_products_by_sales(limit=5):
     return products
 
 def get_top_products_by_profitability(limit=5):
-    """Obtiene los top productos más rentables (margen * cantidad vendida)."""
+    """Gets the top products by profitability (margin * quantity sold)."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -957,7 +957,7 @@ def get_top_products_by_profitability(limit=5):
     return products
 
 def get_cost_breakdown_by_category():
-    """Obtiene el desglose de costos por categoría."""
+    """Gets the cost breakdown by category."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -971,7 +971,7 @@ def get_cost_breakdown_by_category():
     return breakdown
 
 def get_products_without_movement(days=30):
-    """Obtiene productos sin movimiento en los últimos N días."""
+    """Gets products without movement in the last N days."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -990,7 +990,7 @@ def get_products_without_movement(days=30):
     return products
 
 def get_inventory_valuation_by_category():
-    """Obtiene la valorización del inventario por categoría (product_type)."""
+    """Gets inventory valuation by category (product_type)."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -1008,11 +1008,11 @@ def get_inventory_valuation_by_category():
     return valuation
 
 def get_financial_metrics_current_month():
-    """Obtiene métricas financieras del mes actual."""
+    """Gets financial metrics for the current month."""
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Ventas del mes
+    # Sales for the month
     cursor.execute("""
         SELECT 
             COUNT(*) as sales_count,
@@ -1023,7 +1023,7 @@ def get_financial_metrics_current_month():
     """)
     sales_metrics = dict(cursor.fetchone() or {})
     
-    # Ingresos del mes
+    # Revenue for the month
     cursor.execute("""
         SELECT SUM(amount) as total_revenue
         FROM revenue
@@ -1032,7 +1032,7 @@ def get_financial_metrics_current_month():
     revenue_result = cursor.fetchone()
     total_revenue = revenue_result['total_revenue'] if revenue_result and revenue_result['total_revenue'] else 0
     
-    # Costos del mes
+    # Costs for the month
     cursor.execute("""
         SELECT SUM(amount) as total_costs
         FROM costs
@@ -1041,7 +1041,7 @@ def get_financial_metrics_current_month():
     costs_result = cursor.fetchone()
     total_costs = costs_result['total_costs'] if costs_result and costs_result['total_costs'] else 0
     
-    # Calcular margen de ganancia
+    # Calculate profit margin
     profit = total_revenue - total_costs
     profit_margin = (profit / total_revenue * 100) if total_revenue > 0 else 0
     

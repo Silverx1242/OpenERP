@@ -1,34 +1,34 @@
-# OpenPYME ERP/CRM
+# OpenERP
 
-Sistema de gestión empresarial (ERP/CRM) para pequeñas y medianas empresas, desarrollado con Python y una interfaz web moderna.
+Enterprise resource planning (ERP/CRM) system for small and medium businesses, developed with Python and a modern web interface.
 
-## 🚀 Características
+## 🚀 Features
 
-- **Gestión de Inventario**: Control completo de productos, stock, proveedores y materias primas
-- **Bill of Materials (BOM)**: Gestión de listas de materiales y cálculo de producción
-- **Planificación de Producción (MRP)**: Cálculo automático de productos fabricables según inventario
-- **Gestión Financiera**: Registro de ingresos, costos y categorización de gastos
-- **Ventas**: Historial completo de ventas con seguimiento en tiempo real
-- **Business Intelligence**: Dashboard con KPIs, métricas financieras y análisis de productos
-- **Exportación a Excel**: Generación de reportes y exportación de datos completos
-- **Integración con Google Sheets**: Sincronización opcional con Google Sheets
+- **Inventory Management**: Complete control of products, stock, suppliers and raw materials
+- **Bill of Materials (BOM)**: Material list management and production calculation
+- **Production Planning (MRP)**: Automatic calculation of manufacturable products based on inventory
+- **Financial Management**: Revenue and cost recording with expense categorization
+- **Sales**: Complete sales history with real-time tracking
+- **Business Intelligence**: Dashboard with KPIs, financial metrics and product analysis
+- **Excel Export**: Report generation and complete data export
+- **Google Sheets Integration**: Optional synchronization with Google Sheets
 
-## 📋 Requisitos
+## 📋 Requirements
 
-- Python 3.8 o superior
-- Sistema operativo: Windows, macOS o Linux
+- Python 3.8 or higher
+- Operating system: Windows, macOS or Linux
 
-## 🛠️ Instalación
+## 🛠️ Installation
 
-### Instalación desde código fuente
+### Installation from source code
 
-1. Clona el repositorio:
+1. Clone the repository:
 ```bash
 git clone https://github.com/Silverx1242/OpenERP.git
 cd OpenERP
 ```
 
-2. Crea un entorno virtual (recomendado):
+2. Create a virtual environment (recommended):
 ```bash
 python -m venv venv
 
@@ -39,158 +39,157 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-3. Instala las dependencias:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Ejecuta la aplicación:
+4. Run the application:
 ```bash
 python main.py
 ```
 
-## 📦 Descarga de ejecutables
+## 📦 Download executables
 
-Puedes descargar ejecutables pre-construidos desde la sección [Releases](https://github.com/Silverx1242/OpenERP/releases).
+You can download pre-built executables from the [Releases](https://github.com/Silverx1242/OpenERP/releases) section.
 
 ### macOS
-- Descarga el archivo `.dmg` o `.app.zip` desde los releases
-- Para `.dmg`: Abre el archivo y arrastra la aplicación a la carpeta Aplicaciones
-- Para `.app.zip`: Descomprime y arrastra `OpenPYME_ERP.app` a la carpeta Aplicaciones
+- Download the `.dmg` or `.app.zip` file from releases
+- For `.dmg`: Open the file and drag the application to the Applications folder
+- For `.app.zip`: Extract and drag `OpenERP.app` to the Applications folder
 
-## 🔧 Configuración
+## 🔧 Configuration
 
-### Base de Datos
+### Database
 
-La aplicación utiliza SQLite como base de datos local. El archivo `erp_data.db` se crea automáticamente en el directorio de ejecución la primera vez que se inicia la aplicación.
+The application uses SQLite as the local database. The `erp_data.db` file is automatically created in the execution directory the first time the application is started.
 
-### Integración con Google Sheets (Opcional)
+### Google Sheets Integration (Optional)
 
-Para habilitar la sincronización con Google Sheets:
+To enable synchronization with Google Sheets:
 
-1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea un nuevo proyecto
-3. Habilita las APIs de Google Sheets y Google Drive
-4. Crea una cuenta de servicio (Service Account)
-5. Descarga el archivo JSON de credenciales
-6. Guárdalo como `service_account.json` en la raíz del proyecto
-7. Comparte tu Google Sheet con el email de la cuenta de servicio
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable Google Sheets and Google Drive APIs
+4. Create a service account
+5. Download the JSON credentials file
+6. Save it as `service_account.json` in the project root
+7. Share your Google Sheet with the service account email
 
-## 📖 Uso
+## 📖 Usage
 
-### Gestión de Inventario
+### Inventory Management
 
-- **Añadir Productos**: Navega a "Inventario" y completa el formulario con los datos del producto
-- **Tipos de Producto**:
-  - `final`: Productos terminados para venta
-  - `hijo`: Materias primas/insumos
-  - `padre`: Sub-ensamblajes
-  - `otro`: Otros gastos o categorías
+- **Add Products**: Navigate to "Inventory" and complete the form with product data
+- **Product Types**:
+  - `final`: Finished products for sale
+  - `hijo`: Raw materials/components
+  - `padre`: Sub-assemblies
+  - `otro`: Other expenses or categories
 
 ### Bill of Materials (BOM)
 
-- Define las listas de materiales para productos compuestos
-- El sistema calcula automáticamente el costo total basado en los componentes
-- Utiliza el cálculo de producción (MRP) para saber cuántos productos puedes fabricar
+- Define material lists for composite products
+- The system automatically calculates total cost based on components
+- Use production calculation (MRP) to know how many products you can manufacture
 
-### Finanzas
+### Finance
 
-- Registra ingresos y costos
-- Categoriza los costos para mejor análisis
-- Visualiza resúmenes financieros en el dashboard
+- Record revenue and costs
+- Categorize costs for better analysis
+- View financial summaries in the dashboard
 
-### Exportación de Datos
+### Data Export
 
-- Utiliza el botón "Exportar a Excel" para generar un archivo completo con todas las secciones
-- Los archivos se guardan en:
-  - Windows/Linux: Directorio actual
-  - macOS (desde .app): `~/Documents/OpenPYME_ERP/`
+- Use the "Export to Excel" button to generate a complete file with all sections
+- Files are saved in:
+  - Windows/Linux: Current directory
+  - macOS (from .app): `~/Documents/OpenERP/`
 
-## 🏗️ Construcción desde código fuente
+## 🏗️ Building from source code
 
 ### macOS
 
-Para construir un ejecutable `.app` en macOS:
+To build a `.app` executable on macOS:
 
 ```bash
-# Instalar dependencias de construcción
+# Install build dependencies
 pip install pyinstaller
 
-# Convertir icono a formato .icns (si es necesario)
-# Opción 1: Usar iconutil (requiere .iconset)
-# Opción 2: Usar convert (ImageMagick)
+# Convert icon to .icns format (if necessary)
+# Option 1: Use iconutil (requires .iconset)
+# Option 2: Use convert (ImageMagick)
 
-# Construir la aplicación
-pyinstaller --name="OpenPYME_ERP" \
+# Build the application
+pyinstaller --name="OpenERP" \
   --windowed \
   --onedir \
   --icon=assets/icono.icns \
   --add-data="app/ui:app/ui" \
   --add-data="assets:assets" \
-  --osx-bundle-identifier="com.openpyme.erp" \
+  --osx-bundle-identifier="com.openerp.erp" \
   main.py
 ```
 
 ### GitHub Actions
 
-El repositorio incluye un workflow de GitHub Actions que construye automáticamente la aplicación para macOS cuando se crea un tag de release:
+The repository includes a GitHub Actions workflow that automatically builds the application for macOS when a release tag is created:
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-El workflow se ejecutará automáticamente y generará los artefactos en la sección de Actions.
+The workflow will run automatically and generate artifacts in the Actions section.
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
-openpyme-erp/
+openerp/
 ├── app/
 │   ├── __init__.py
-│   ├── database.py          # Gestión de base de datos SQLite
-│   ├── excel_export.py      # Exportación a Excel
-│   ├── g_sheets.py          # Integración con Google Sheets
+│   ├── database.py          # SQLite database management
+│   ├── excel_export.py      # Excel export
+│   ├── g_sheets.py          # Google Sheets integration
 │   └── ui/
-│       └── index.html       # Interfaz web
+│       └── index.html        # Web interface
 ├── assets/
-│   ├── icono.ico           # Icono de la aplicación (Windows)
-│   └── icono.icns          # Icono de la aplicación (macOS)
+│   ├── icono.ico           # Application icon (Windows)
+│   └── icono.icns          # Application icon (macOS)
 ├── .github/
 │   └── workflows/
-│       └── build-macos.yml  # Workflow para construir .app de macOS
-├── main.py                 # Punto de entrada principal
-├── requirements.txt        # Dependencias del proyecto
-├── .gitignore             # Archivos ignorados por Git
-└── README.md              # Este archivo
+│       └── build-macos.yml  # Workflow to build macOS .app
+├── main.py                 # Main entry point
+├── requirements.txt        # Project dependencies
+├── .gitignore             # Files ignored by Git
+└── README.md              # This file
 ```
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas. Por favor:
+Contributions are welcome. Please:
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📝 Licencia
+## 📝 License
 
-Este proyecto está bajo la Licencia MIT - ver el archivo LICENSE para más detalles.
+This project is under the MIT License - see the LICENSE file for more details.
 
-## 🙏 Agradecimientos
+## 🙏 Acknowledgments
 
-- [pywebview](https://github.com/r0x0r/pywebview) - Framework para interfaces web nativas
-- [openpyxl](https://openpyxl.readthedocs.io/) - Manipulación de archivos Excel
-- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitario
-- [Chart.js](https://www.chartjs.org/) - Gráficos interactivos
+- [pywebview](https://github.com/r0x0r/pywebview) - Framework for native web interfaces
+- [openpyxl](https://openpyxl.readthedocs.io/) - Excel file manipulation
+- [Tailwind CSS](https://tailwindcss.com/) - Utility CSS framework
+- [Chart.js](https://www.chartjs.org/) - Interactive charts
 
-## 📧 Contacto
+## 📧 Contact
 
-Para preguntas o sugerencias, abre un issue en el repositorio.
+For questions or suggestions, open an issue in the repository.
 
 ---
 
-Desarrollado con ❤️ para PyMEs
-
+Developed with ❤️ for SMEs
