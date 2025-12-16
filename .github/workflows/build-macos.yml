@@ -57,9 +57,12 @@ jobs:
           --noconfirm \
           --onedir \
           --icon=assets/icono.icns \
-          --add-data="app/ui:app/ui" \
+          --add-data="app:app" \
           --add-data="assets:assets" \
           --osx-bundle-identifier="com.openpyme.erp" \
+          --hidden-import=webview \
+          --hidden-import=sqlite3 \
+          --hidden-import=openpyxl \
           --clean \
           main.py
           
@@ -140,9 +143,12 @@ jobs:
           --noconfirm \
           --onedir \
           --icon=assets/icono.icns \
-          --add-data="app/ui:app/ui" \
+          --add-data="app:app/" \
           --add-data="assets:assets" \
           --osx-bundle-identifier="com.openpyme.erp" \
+          --hidden-import=webview \
+          --hidden-import=sqlite3 \
+          --hidden-import=openpyxl \
           --clean \
           main.py
           
